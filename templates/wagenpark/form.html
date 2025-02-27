@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Formulier - Wagenpark{% endblock %}
+{% block content %}
+  <h1>Formulier voor Wagenpark</h1>
+  <form method='post'>
+      {% csrf_token %}
+      <!-- form fields hier -->
+      <button type='submit'>Verstuur</button>
+  </form>
+{% endblock %}

@@ -1,0 +1,1 @@
+# Admin configuratie voor magazijn

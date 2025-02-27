@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Formulier - Log_in_pagina{% endblock %}
+{% block content %}
+  <h1>Formulier voor Log_in_pagina</h1>
+  <form method='post'>
+      {% csrf_token %}
+      <!-- form fields hier -->
+      <button type='submit'>Verstuur</button>
+  </form>
+{% endblock %}
