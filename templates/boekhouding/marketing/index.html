@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Marketing Campagnes{% endblock %}
+{% block content %}
+<h1>Marketing Campagnes</h1>
+<a href="{% url 'marketing_add' %}" style="display:inline-block; margin-bottom:10px;">Nieuwe campagne toevoegen</a>
+<a href="{% url 'marketing_history' %}" style="display:inline-block; margin-bottom:10px;">Bekijk Geschiedenis</a>
+
+<ul>
+    {% for campagne in campagnes %}
+    <li>
+        <strong>{{ campagne.naam }}</strong><br>
+        Start: {{ campagne.startdatum }}<br>
+        Eind: {% if campagne.einddatum %}{{ campagne.einddatum }}{% else %}Doorlopend{% endif %}<br>
+        Budget: €{{ campagne.budget }}<br>
+        Uitgegeven: €{{ campagne.uitgegeven_bedrag }}<br>
+        {% if campagne.provincie %}Provincie: {{ campagne.provincie }}{% endif %}<br>
+        Strategie: {{ campagne.strategie }}<br>
+        Omschrijving: {{ campagne.omschrijving }}<br>
+        Gearchiveerd: {{ campagne.archived }}
+    </li>
+    {% empty %}
+    <li>Geen campagnes gevonden.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

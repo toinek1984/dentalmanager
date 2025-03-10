@@ -1,5 +1,33 @@
 {% extends 'base.html' %}
-{% block title %}Index - Planning{% endblock %}
+{% block title %}Werkbon Overzicht{% endblock %}
 {% block content %}
-  <h1>Indexpagina van Planning</h1>
+<h1>Werkbon Overzicht</h1>
+<table class="list-view">
+    <thead>
+        <tr>
+            <th>Werkbonnummer</th>
+            <th>Klantnaam</th>
+            <th>Status</th>
+            <th>Acties</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for wb in werkbonnen %}
+        <tr>
+            <td>{{ wb.werkbonnummer }}</td>
+            <td>{% if wb.klant %}{{ wb.klant.naam }}{% else %}Niet gekoppeld{% endif %}</td>
+            <td>{{ wb.get_status_display }}</td>
+            <td>
+                <a href="{% url 'werkbon_detail' wb.pk %}">Bekijk</a> |
+                <a href="{% url 'werkbon_print' wb.pk %}" target="_blank">Print</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">Geen werkbonnen gevonden.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{% url 'create_werkbon' %}">Nieuwe Werkbon Aanmaken</a>
 {% endblock %}

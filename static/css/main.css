@@ -1,2 +1,89 @@
-/* Globale CSS */
-body { font-family: Arial, sans-serif; }
+/* Reset en basis */
+body {
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #F0F0F0;
+    color: #333;
+}
+
+/* Header: Windows Explorer-achtige stijl met kleine icoontjes */
+header {
+    background-color: #0078D7;
+    color: #FFF;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+}
+
+header nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+header nav ul li {
+    margin-right: 20px;
+    display: flex;
+    align-items: center;
+}
+
+header nav ul li a {
+    color: #FFF;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+header nav ul li img {
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
+}
+
+/* Container voor de hoofdinhoud, vergelijkbaar met Windows Verkenner */
+.container {
+    display: flex;
+    height: calc(100vh - 50px); /* header + eventueel footer */
+}
+
+/* Sidebar (linker navigatie, zoals in Verkenner) */
+.sidebar {
+    width: 200px;
+    background-color: #E5E5E5;
+    border-right: 1px solid #CCC;
+    overflow-y: auto;
+}
+
+/* Hoofdcontent */
+.main-content {
+    flex-grow: 1;
+    padding: 10px;
+    background-color: #FFF;
+    overflow-y: auto;
+    border-left: 1px solid #CCC;
+}
+
+/* Lijstweergave voor bestanden/elementen */
+.list-view {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.list-view th, .list-view td {
+    border: 1px solid #CCC;
+    padding: 8px;
+    text-align: left;
+}
+
+.list-view th {
+    background-color: #F3F3F3;
+}
+
+/* Footer */
+footer {
+    background-color: #0078D7;
+    color: #FFF;
+    padding: 10px 20px;
+    text-align: center;
+}
+

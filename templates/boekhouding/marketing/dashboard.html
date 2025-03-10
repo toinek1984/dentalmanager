@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Marketing Dashboard{% endblock %}
+{% block content %}
+<h1>Marketing Dashboard</h1>
+<p>Overzicht voor de week van {{ start_week }} tot {{ end_week }}</p>
+
+<table border="1" cellspacing="0" cellpadding="5">
+    <thead>
+        <tr>
+            <th>Marketing Campagne</th>
+            <th>Provincie</th>
+            <th>Aantal Werkbonnen</th>
+            <th>Aantal Klanten</th>
+            <th>Totaal Verkoopwaarde</th>
+            <th>Totaal Inkoopwaarde</th>
+            <th>Winst/Verlies</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in werkbon_data %}
+        <tr>
+            <td>{{ item.marketing_optie__naam }}</td>
+            <td>{{ item.marketing_optie__provincie__naam }}</td>
+            <td>{{ item.aantal_werkbonnen }}</td>
+            <td>{{ item.aantal_klanten }}</td>
+            <td>€{{ item.totaal_verkoop }}</td>
+            <td>€{{ item.totaal_inkoop }}</td>
+            <td>€{{ item.winst }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7">Geen werkbonnen gevonden voor deze week.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

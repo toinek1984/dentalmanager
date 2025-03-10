@@ -1,10 +1,208 @@
 {% extends 'base.html' %}
-{% block title %}Formulier - Planning{% endblock %}
+{% block title %}Nieuwe Werkbon Aanmaken{% endblock %}
 {% block content %}
-  <h1>Formulier voor Planning</h1>
-  <form method='post'>
-      {% csrf_token %}
-      <!-- form fields hier -->
-      <button type='submit'>Verstuur</button>
-  </form>
+<h1>Nieuwe Werkbon Aanmaken</h1>
+<form method="post">
+    {% csrf_token %}
+    
+    <!-- Klantgegevens -->
+    <fieldset>
+        <legend>Klantgegevens</legend>
+        <label for="klant_naam">Klantnaam (zoeken of toevoegen):</label>
+        <input type="text" id="klant_naam" name="klant_naam" required><br>
+        
+        <label for="klant_adres">Adres:</label>
+        <input type="text" id="klant_adres" name="klant_adres"><br>
+        
+        <label for="klant_woonplaats">Woonplaats:</label>
+        <input type="text" id="klant_woonplaats" name="klant_woonplaats"><br>
+        
+        <label for="klant_geboortedatum">Geboortedatum:</label>
+        <input type="date" id="klant_geboortedatum" name="klant_geboortedatum"><br>
+        
+        <label for="klant_telefoon">Telefoonnummer:</label>
+        <input type="text" id="klant_telefoon" name="klant_telefoon"><br>
+        
+        <label for="klant_email">Email:</label>
+        <input type="email" id="klant_email" name="klant_email"><br>
+        
+        <label for="klant_verzekeringsnummer">Verzekeringsnummer:</label>
+        <input type="text" id="klant_verzekeringsnummer" name="klant_verzekeringsnummer"><br>
+        
+        <label for="mantelzorger">Heeft mantelzorger?</label>
+        <input type="checkbox" id="mantelzorger" name="mantelzorger"><br>
+        
+        <label for="mantelzorger_naam">Mantelzorger Naam:</label>
+        <input type="text" id="mantelzorger_naam" name="mantelzorger_naam"><br>
+        
+        <label for="mantelzorger_telefoon">Mantelzorger Telefoon:</label>
+        <input type="text" id="mantelzorger_telefoon" name="mantelzorger_telefoon"><br>
+        
+        <label for="mantelzorger_geboortedatum">Mantelzorger Geboortedatum:</label>
+        <input type="date" id="mantelzorger_geboortedatum" name="mantelzorger_geboortedatum"><br>
+        
+        <label for="onder_bewind">Onder bewind?</label>
+        <input type="checkbox" id="onder_bewind" name="onder_bewind"><br>
+        
+        <label for="klant_herkomst">Hoe is de klant bij ons gekomen?</label>
+        <select id="klant_herkomst" name="klant_herkomst">
+            <option value="">Selecteer</option>
+            <option value="google">Google</option>
+            <option value="facebook">Facebook</option>
+            <option value="krant">Krant</option>
+            <option value="radio">Radio</option>
+            <option value="viavia">Viavia</option>
+            <option value="folder">Folder</option>
+            <option value="sponsoring">Sponsoring</option>
+            <option value="anders">Anders</option>
+        </select><br>
+    </fieldset>
+    
+    <!-- Opdrachtgevergegevens -->
+    <fieldset>
+        <legend>Opdrachtgevergegevens</legend>
+        <label for="opdrachtgever_naam">Opdrachtgever Naam:</label>
+        <input type="text" id="opdrachtgever_naam" name="opdrachtgever_naam"><br>
+        
+        <label for="opdrachtgever_adres">Opdrachtgever Adres:</label>
+        <input type="text" id="opdrachtgever_adres" name="opdrachtgever_adres"><br>
+        
+        <label for="opdrachtgever_telefoon">Opdrachtgever Telefoon:</label>
+        <input type="text" id="opdrachtgever_telefoon" name="opdrachtgever_telefoon"><br>
+        
+        <label for="opdrachtgever_email">Opdrachtgever Email:</label>
+        <input type="email" id="opdrachtgever_email" name="opdrachtgever_email"><br>
+        
+        <label for="opdrachtgever_kvk">Opdrachtgever KvK:</label>
+        <input type="text" id="opdrachtgever_kvk" name="opdrachtgever_kvk"><br>
+        
+        <label for="opdrachtgever_contactpersoon">Opdrachtgever Contactpersoon:</label>
+        <input type="text" id="opdrachtgever_contactpersoon" name="opdrachtgever_contactpersoon"><br>
+        
+        <label for="opdrachtgever_woonplaats">Opdrachtgever Woonplaats:</label>
+        <input type="text" id="opdrachtgever_woonplaats" name="opdrachtgever_woonplaats"><br>
+    </fieldset>
+    
+    <!-- Werkbon Specifieke Gegevens -->
+    <fieldset>
+        <legend>Werkbon Gegevens</legend>
+        <label for="gebitsdatum">Gebitsdatum:</label>
+        <input type="date" id="gebitsdatum" name="gebitsdatum"><br>
+        
+        <label for="tandkleur">Tandkleur:</label>
+        <select id="tandkleur" name="tandkleur">
+            <option value="">Selecteer tandkleur</option>
+            <option value="a1">A1</option>
+            <option value="a2">A2</option>
+            <option value="a3">A3</option>
+            <option value="a3,5">A3,5</option>
+            <option value="c1">C1</option>
+            <option value="c2">C2</option>
+        </select><br>
+        
+        <label for="aanvang_werkzaamheden">Aanvang werkzaamheden:</label>
+        <input type="date" id="aanvang_werkzaamheden" name="aanvang_werkzaamheden"><br>
+        
+        <label for="naaminpersen">Naaminpersen:</label>
+        <input type="checkbox" id="naaminpersen" name="naaminpersen"><br>
+        
+        <label for="behandelaar">Behandelaar:</label>
+        <select id="behandelaar" name="behandelaar">
+            <option value="">Selecteer een behandelaar</option>
+            <option value="Jellie">Jellie</option>
+            <option value="Romy">Romy</option>
+            <option value="Sabrina">Sabrina</option>
+            <option value="Ellen">Ellen</option>
+            <option value="Usman">Usman</option>
+        </select><br>
+        
+        <label for="technicus">Technicus:</label>
+        <select id="technicus" name="technicus">
+            <option value="">Selecteer een technicus</option>
+            <option value="Job">Job</option>
+            <option value="Myrthe">Myrthe</option>
+            <option value="Jellie">Jellie</option>
+            <option value="Sabrina">Sabrina</option>
+            <option value="Romy">Romy</option>
+            <option value="Ellen">Ellen</option>
+            <option value="Usman">Usman</option>
+        </select><br>
+        
+        <label for="notities">Notities:</label>
+        <textarea id="notities" name="notities"></textarea><br>
+        
+        <label for="nza_code">NZA Code:</label>
+        <select id="nza_code" name="nza_code">
+            <option value="">Selecteer een NZA code</option>
+            <option value="code1">Code 1</option>
+            <option value="code2">Code 2</option>
+            <option value="code3">Code 3</option>
+        </select><br>
+        
+        <label for="facturabel_garantie">Facturabel of Garantie:</label>
+        <select id="facturabel_garantie" name="facturabel_garantie">
+            <option value="">Selecteer</option>
+            <option value="facturabel">Facturabel</option>
+            <option value="garantie">Garantie</option>
+        </select><br>
+    </fieldset>
+    
+    <!-- Marketing Gegevens -->
+    <fieldset>
+        <legend>Marketing Gegevens</legend>
+        <label for="provincie">Provincie:</label>
+        <select id="provincie" name="provincie">
+            <option value="">Selecteer provincie</option>
+            <option value="Groningen">Groningen</option>
+            <option value="Friesland">Friesland</option>
+            <!-- Voeg andere provincies toe indien nodig -->
+        </select><br>
+        
+        <label for="marketing_optie">Marketing Optie:</label>
+        <select id="marketing_optie" name="marketing_optie">
+            <option value="">Selecteer marketing optie</option>
+            <!-- Deze opties worden gefilterd via JavaScript -->
+        </select><br>
+    </fieldset>
+    
+    <!-- Submit knoppen -->
+    <button type="submit" name="action" value="save">Opslaan</button>
+    <button type="submit" name="action" value="print">Opslaan en Print</button>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Voorbeelddata voor marketingcampagnes, normaal geladen via de backend
+  var marketingCampagnes = [
+    {id: 1, naam: "Campagne A", provincie: "Groningen"},
+    {id: 2, naam: "Campagne B", provincie: "Friesland"},
+    {id: 3, naam: "Campagne C", provincie: "Groningen"},
+    {id: 4, naam: "Campagne D", provincie: "Friesland"}
+  ];
+
+  document.addEventListener("DOMContentLoaded", function() {
+    var provincieSelect = document.getElementById("provincie");
+    var marketingSelect = document.getElementById("marketing_optie");
+
+    provincieSelect.addEventListener("change", function() {
+      var gekozenProvincie = this.value;
+      // Maak de marketing dropdown leeg
+      marketingSelect.innerHTML = '<option value="">Selecteer marketing optie</option>';
+      
+      // Filter marketingcampagnes op basis van de gekozen provincie
+      var gefilterdeCampagnes = marketingCampagnes.filter(function(campagne) {
+        return campagne.provincie === gekozenProvincie;
+      });
+      
+      // Voeg de gefilterde campagnes toe aan de dropdown
+      gefilterdeCampagnes.forEach(function(campagne) {
+        var option = document.createElement("option");
+        option.value = campagne.id;
+        option.text = campagne.naam;
+        marketingSelect.appendChild(option);
+      });
+    });
+  });
+</script>
 {% endblock %}

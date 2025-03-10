@@ -1,5 +1,18 @@
 {% extends 'base.html' %}
-{% block title %}Detail - Planning{% endblock %}
+{% block title %}Werkbon Detail{% endblock %}
 {% block content %}
-  <h1>Detailpagina van Planning</h1>
+<h1>Werkbon {{ werkbon.werkbonnummer }}</h1>
+<p><strong>Barcode:</strong> {{ werkbon.barcode }}</p>
+<p><strong>Klant:</strong> {% if werkbon.klant %}{{ werkbon.klant.naam }}{% else %}Niet gekoppeld{% endif %}</p>
+<p><strong>Gebitsdatum:</strong> {{ werkbon.gebitsdatum }}</p>
+<p><strong>Tandkleur:</strong> {{ werkbon.get_tandkleur_display }}</p>
+<p><strong>Aanvang werkzaamheden:</strong> {{ werkbon.aanvang_werkzaamheden }}</p>
+<p><strong>Naaminpersen:</strong> {{ werkbon.naaminpersen }}</p>
+<p><strong>Behandelaar:</strong> {{ werkbon.behandelaar }}</p>
+<p><strong>Technicus:</strong> {{ werkbon.technicus }}</p>
+<p><strong>Notities:</strong> {{ werkbon.notities }}</p>
+<p><strong>Hoe is de klant bij ons gekomen:</strong> {{ werkbon.get_klant_herkomst_display }}</p>
+<p><strong>NZA Code:</strong> {{ werkbon.get_nza_code_display }}</p>
+<p><strong>Facturabel/Garantie:</strong> {{ werkbon.get_facturabel_garantie_display }}</p>
+<p><strong>Status:</strong> {{ werkbon.get_status_display }}</p>
 {% endblock %}

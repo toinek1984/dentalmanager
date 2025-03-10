@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}NZA Codes Overzicht{% endblock %}
+{% block content %}
+<h1>NZA Codes Overzicht</h1>
+<a href="{% url 'nza_add' %}" style="display:inline-block; margin-bottom:10px;">Nieuwe NZA Code Toevoegen</a>
+<ul>
+    {% for code in codes %}
+    <li>
+        <strong>{{ code.code }}</strong> - Techniekkosten: €{{ code.techniekkosten }}, Honorarium: €{{ code.honorarium }}<br>
+        Beschrijving: {{ code.beschrijving }}<br>
+        Aantal werkfases: {{ code.werkfases.count }}<br>
+        {% if code.werkfases.all %}
+            <ul>
+            {% for fase in code.werkfases.all %}
+                <li>Fase {{ fase.volgorde }}: {{ fase.duur }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        <a href="{% url 'nza_edit' code.pk %}">Bewerk</a>
+    </li>
+    {% empty %}
+    <li>Geen NZA Codes gevonden.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

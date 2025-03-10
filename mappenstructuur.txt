@@ -1,0 +1,446 @@
+C:.
++---apps
+|   +---beheerderspagina
+|   +---boekhouding
+|   |   +---crediteuren
+|   |   +---debiteuren
+|   |   +---facturatie
+|   |   +---grootboekrekeningen
+|   |   +---kunstgebitaanhuis
+|   |   +---laboratorium
+|   |   +---marketing
+|   |   +---tarieven
+|   |   \---totaal_overzicht
+|   +---hr
+|   |   +---belastingdienst
+|   |   +---salarisadministratie
+|   |   +---urenoverzicht
+|   |   +---uwv
+|   |   +---verzekeringen
+|   |   \---werknemers
+|   +---klanten
+|   |   +---klantdossier
+|   |   +---klantenoverzicht
+|   |   \---zoeken
+|   +---log_in_pagina
+|   +---magazijn
+|   |   +---bestellijst
+|   |   +---voorraad
+|   |   \---waardeoverzicht
+|   +---planning
+|   |   +---aanmaken_werkbon
+|   |   +---planning_behandelaren
+|   |   +---planning_freesmachine
+|   |   +---planning_laboratorium
+|   |   \---werkbon_overzicht
+|   \---wagenpark
+|       +---auto_1
+|       \---auto_2
++---dentalmanager
+|   \---settings
++---static
+|   +---css
+|   +---images
+|   \---js
+\---templates
+    +---beheerderspagina
+    +---boekhouding
+    |   \---submodules
+    |       +---crediteuren
+    |       +---debiteuren
+    |       +---facturatie
+    |       +---grootboekrekeningen
+    |       +---kunstgebitaanhuis
+    |       +---laboratorium
+    |       +---marketing
+    |       +---tarieven
+    |       \---totaal_overzicht
+    +---hr
+    +---klanten
+    +---log_in_pagina
+    +---magazijn
+    +---partials
+    +---planning
+    \---wagenpark
+
+C:\Users\Gebruiker\Documents\dentalmanager> tree/f
+Folder PATH listing
+Volume serial number is E0E3-9612
+C:.
+│   manage.py
+│
+├───apps
+│   ├───beheerderspagina
+│   │       admin.py
+│   │       apps.py
+│   │       models.py
+│   │       tests.py
+│   │       urls.py
+│   │       views.py
+│   │       __init__.py
+│   │
+│   ├───boekhouding
+│   │   │   admin.py
+│   │   │   apps.py
+│   │   │   models.py
+│   │   │   tests.py
+│   │   │   urls.py
+│   │   │   views.py
+│   │   │   __init__.py
+│   │   │
+│   │   ├───crediteuren
+│   │   │       urls.py
+│   │   │       views.py
+│   │   │       __init__.py
+│   │   │
+│   │   ├───debiteuren
+│   │   │       urls.py
+│   │   │       views.py
+│   │   │       __init__.py
+│   │   │
+│   │   ├───facturatie
+│   │   │       urls.py
+│   │   │       views.py
+│   │   │       __init__.py
+│   │   │
+│   │   ├───grootboekrekeningen
+│   │   │       urls.py
+│   │   │       views.py
+│   │   │       __init__.py
+│   │   │
+│   │   ├───kunstgebitaanhuis
+│   │   │       urls.py
+│   │   │       views.py
+│   │   │       __init__.py
+│   │   │
+│   │   ├───laboratorium
+│   │   │       urls.py
+│   │   │       views.py
+│   │   │       __init__.py
+│   │   │
+│   │   ├───marketing
+│   │   │       urls.py
+│   │   │       views.py
+│   │   │       __init__.py
+│   │   │
+│   │   ├───tarieven
+│   │   │       urls.py
+│   │   │       views.py
+│   │   │       __init__.py
+│   │   │
+│   │   └───totaal_overzicht
+│   │           urls.py
+│   │           views.py
+│   │           __init__.py
+│   │
+│   ├───hr
+│   │   │   admin.py
+│   │   │   apps.py
+│   │   │   models.py
+│   │   │   tests.py
+│   │   │   urls.py
+│   │   │   views.py
+│   │   │   __init__.py
+│   │   │
+│   │   ├───belastingdienst
+│   │   │       urls.py
+│   │   │       views.py
+│   │   │       __init__.py
+│   │   │
+│   │   ├───salarisadministratie
+│   │   │       urls.py
+│   │   │       views.py
+│   │   │       __init__.py
+│   │   │
+│   │   ├───urenoverzicht
+│   │   │       urls.py
+│   │   │       views.py
+│   │   │       __init__.py
+│   │   │
+│   │   ├───uwv
+│   │   │       urls.py
+│   │   │       views.py
+│   │   │       __init__.py
+│   │   │
+│   │   ├───verzekeringen
+│   │   │       urls.py
+│   │   │       views.py
+│   │   │       __init__.py
+│   │   │
+│   │   └───werknemers
+│   │           urls.py
+│   │           views.py
+│   │           __init__.py
+│   │
+│   ├───klanten
+│   │   │   admin.py
+│   │   │   apps.py
+│   │   │   models.py
+│   │   │   tests.py
+│   │   │   urls.py
+│   │   │   views.py
+│   │   │   __init__.py
+│   │   │
+│   │   ├───klantdossier
+│   │   │       urls.py
+│   │   │       views.py
+│   │   │       __init__.py
+│   │   │
+│   │   ├───klantenoverzicht
+│   │   │       urls.py
+│   │   │       views.py
+│   │   │       __init__.py
+│   │   │
+│   │   └───zoeken
+│   │           urls.py
+│   │           views.py
+│   │           __init__.py
+│   │
+│   ├───log_in_pagina
+│   │       admin.py
+│   │       apps.py
+│   │       models.py
+│   │       tests.py
+│   │       urls.py
+│   │       views.py
+│   │       __init__.py
+│   │
+│   ├───magazijn
+│   │   │   admin.py
+│   │   │   apps.py
+│   │   │   models.py
+│   │   │   tests.py
+│   │   │   urls.py
+│   │   │   views.py
+│   │   │   __init__.py
+│   │   │
+│   │   ├───bestellijst
+│   │   │       urls.py
+│   │   │       views.py
+│   │   │       __init__.py
+│   │   │
+│   │   ├───voorraad
+│   │   │       urls.py
+│   │   │       views.py
+│   │   │       __init__.py
+│   │   │
+│   │   └───waardeoverzicht
+│   │           urls.py
+│   │           views.py
+│   │           __init__.py
+│   │
+│   ├───planning
+│   │   │   admin.py
+│   │   │   apps.py
+│   │   │   models.py
+│   │   │   tests.py
+│   │   │   urls.py
+│   │   │   views.py
+│   │   │   __init__.py
+│   │   │
+│   │   ├───aanmaken_werkbon
+│   │   │       urls.py
+│   │   │       views.py
+│   │   │       __init__.py
+│   │   │
+│   │   ├───planning_behandelaren
+│   │   │       urls.py
+│   │   │       views.py
+│   │   │       __init__.py
+│   │   │
+│   │   ├───planning_freesmachine
+│   │   │       urls.py
+│   │   │       views.py
+│   │   │       __init__.py
+│   │   │
+│   │   ├───planning_laboratorium
+│   │   │       urls.py
+│   │   │       views.py
+│   │   │       __init__.py
+│   │   │
+│   │   └───werkbon_overzicht
+│   │           urls.py
+│   │           views.py
+│   │           __init__.py
+│   │
+│   └───wagenpark
+│       │   admin.py
+│       │   apps.py
+│       │   models.py
+│       │   tests.py
+│       │   urls.py
+│       │   views.py
+│       │   __init__.py
+│       │
+│       ├───auto_1
+│       │       urls.py
+│       │       views.py
+│       │       __init__.py
+│       │
+│       └───auto_2
+│               urls.py
+│               views.py
+│               __init__.py
+│
+├───dentalmanager
+│   │   asgi.py
+│   │   urls.py
+│   │   wsgi.py
+│   │   __init__.py
+│   │
+│   └───settings
+│           base.py
+│           development.py
+│           production.py
+│
+├───static
+│   ├───css
+│   │       beheerderspagina.css
+│   │       boekhouding.css
+│   │       boekhouding_crediteuren.css
+│   │       boekhouding_debiteuren.css
+│   │       boekhouding_facturatie.css
+│   │       boekhouding_grootboekrekeningen.css
+│   │       boekhouding_kunstgebitaanhuis.css
+│   │       boekhouding_laboratorium.css
+│   │       boekhouding_marketing.css
+│   │       boekhouding_tarieven.css
+│   │       boekhouding_totaal_overzicht.css
+│   │       hr.css
+│   │       klanten.css
+│   │       log_in_pagina.css
+│   │       magazijn.css
+│   │       main.css
+│   │       planning.css
+│   │       wagenpark.css
+│   │
+│   ├───images
+│   └───js
+│           beheerderspagina.js
+│           boekhouding.js
+│           boekhouding_crediteuren.js
+│           boekhouding_debiteuren.js
+│           boekhouding_facturatie.js
+│           boekhouding_grootboekrekeningen.js
+│           boekhouding_kunstgebitaanhuis.js
+│           boekhouding_laboratorium.js
+│           boekhouding_marketing.js
+│           boekhouding_tarieven.js
+│           boekhouding_totaal_overzicht.js
+│           hr.js
+│           klanten.js
+│           log_in_pagina.js
+│           magazijn.js
+│           main.js
+│           planning.js
+│           wagenpark.js
+│
+└───templates
+    │   base.html
+    │
+    ├───beheerderspagina
+    │       dashboard.html
+    │       detail.html
+    │       form.html
+    │       index.html
+    │
+    ├───boekhouding
+    │   │   dashboard.html
+    │   │   detail.html
+    │   │   form.html
+    │   │   index.html
+    │   │
+    │   └───submodules
+    │       ├───crediteuren
+    │       │       dashboard.html
+    │       │       detail.html
+    │       │       form.html
+    │       │       index.html
+    │       │
+    │       ├───debiteuren
+    │       │       dashboard.html
+    │       │       detail.html
+    │       │       form.html
+    │       │       index.html
+    │       │
+    │       ├───facturatie
+    │       │       dashboard.html
+    │       │       detail.html
+    │       │       form.html
+    │       │       index.html
+    │       │
+    │       ├───grootboekrekeningen
+    │       │       dashboard.html
+    │       │       detail.html
+    │       │       form.html
+    │       │       index.html
+    │       │
+    │       ├───kunstgebitaanhuis
+    │       │       dashboard.html
+    │       │       detail.html
+    │       │       form.html
+    │       │       index.html
+    │       │
+    │       ├───laboratorium
+    │       │       dashboard.html
+    │       │       detail.html
+    │       │       form.html
+    │       │       index.html
+    │       │
+    │       ├───marketing
+    │       │       dashboard.html
+    │       │       detail.html
+    │       │       form.html
+    │       │       index.html
+    │       │
+    │       ├───tarieven
+    │       │       dashboard.html
+    │       │       detail.html
+    │       │       form.html
+    │       │       index.html
+    │       │
+    │       └───totaal_overzicht
+    │               dashboard.html
+    │               detail.html
+    │               form.html
+    │               index.html
+    │
+    ├───hr
+    │       dashboard.html
+    │       detail.html
+    │       form.html
+    │       index.html
+    │
+    ├───klanten
+    │       dashboard.html
+    │       detail.html
+    │       form.html
+    │       index.html
+    │
+    ├───log_in_pagina
+    │       dashboard.html
+    │       detail.html
+    │       form.html
+    │       index.html
+    │
+    ├───magazijn
+    │       dashboard.html
+    │       detail.html
+    │       form.html
+    │       index.html
+    │
+    ├───partials
+    │       footer.html
+    │       header.html
+    │
+    ├───planning
+    │       dashboard.html
+    │       detail.html
+    │       form.html
+    │       index.html
+    │
+    └───wagenpark
+            dashboard.html
+            detail.html
+            form.html
+            index.html

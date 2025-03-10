@@ -1,7 +1,10 @@
 from pathlib import Path
 import os
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# BASE_DIR aanpassen zodat deze wijst naar de projectroot (waar manage.py staat)
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = 'jouw-geheime-sleutel'
 DEBUG = True
@@ -16,6 +19,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Apps
     'apps.boekhouding',
+    'apps.boekhouding.tarieven.apps.TarievenConfig',
+    'apps.boekhouding.marketing.apps.MarketingConfig', # Voeg dit toe
     'apps.wagenpark',
     'apps.klanten',
     'apps.hr',
@@ -40,6 +45,7 @@ ROOT_URLCONF = 'dentalmanager.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        # Hiermee zoekt Django naar templates in de map "templates" op projectniveau
         'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -63,3 +69,6 @@ DATABASES = {
 }
 
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+

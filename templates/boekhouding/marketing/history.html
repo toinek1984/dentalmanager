@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Marketing Campagne Geschiedenis{% endblock %}
+{% block content %}
+<h1>Marketing Campagne Geschiedenis</h1>
+
+<!-- Filterformulier -->
+<form method="get" action="{% url 'marketing_history' %}">
+    <fieldset>
+        <legend>Filter Campagnes</legend>
+        <label for="start_date">Startdatum vanaf:</label>
+        <input type="date" id="start_date" name="start_date" value="{{ filters.start_date }}"><br>
+
+        <label for="end_date">Einddatum tot:</label>
+        <input type="date" id="end_date" name="end_date" value="{{ filters.end_date }}"><br>
+
+        <label for="min_budget">Min Budget:</label>
+        <input type="number" step="0.01" id="min_budget" name="min_budget" value="{{ filters.min_budget }}"><br>
+
+        <label for="max_budget">Max Budget:</label>
+        <input type="number" step="0.01" id="max_budget" name="max_budget" value="{{ filters.max_budget }}"><br>
+
+        <label for="strategie">Strategie:</label>
+        <select id="strategie" name="strategie">
+            <option value="">Alle</option>
+            <option value="google" {% if filters.strategie == "google" %}selected{% endif %}>Google</option>
+            <option value="facebook" {% if filters.strategie == "facebook" %}selected{% endif %}>Facebook</option>
+            <option value="krant" {% if filters.strategie == "krant" %}selected{% endif %}>Krant</option>
+            <option value="radio" {% if filters.strategie == "radio" %}selected{% endif %}>Radio</option>
+            <option value="viavia" {% if filters.strategie == "viavia" %}selected{% endif %}>Viavia</option>
+            <option value="folder" {% if filters.strategie == "folder" %}selected{% endif %}>Folder</option>
+            <option value="sponsoring" {% if filters.strategie == "sponsoring" %}selected{% endif %}>Sponsoring</option>
+            <option value="anders" {% if filters.strategie == "anders" %}selected{% endif %}>Anders</option>
+        </select><br>
+
+        <label for="provincie">Provincie:</label>
+        <select id="provincie" name="provincie">
+            <option value="">Alle</option>
+            {% for prov in provinces %}
+            <option value="{{ prov.naam }}" {% if filters.provincie == prov.naam %}selected{% endif %}>{{ prov.naam }}</option>
+            {% endfor %}
+        </select><br>
+
+        <button type="submit">Zoeken</button>
+    </fieldset>
+</form>
+
+<hr>
+<h2>Resultaten:</h2>
+{% if campaigns %}
+  <ul>
+  {% for campagne in campaigns %}
+    <li>
+      <strong>{{ campagne.naam }}</strong><br>
+      Start: {{ campagne.startdatum }}<br>
+      Eind: {% if campagne.einddatum %}{{ campagne.einddatum }}{% else %}Doorlopend{% endif %}<br>
+      Budget: €{{ campagne.budget }}<br>
+      Uitgegeven: €{{ campagne.uitgegeven_bedrag }}<br>
+      {% if campagne.provincie %}Provincie: {{ campagne.provincie }}{% endif %}<br>
+      Strategie: {{ campagne.strategie }}<br>
+      Omschrijving: {{ campagne.omschrijving }}
+    </li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p>Geen campagnes gevonden voor deze filters.</p>
+{% endif %}
+{% endblock %}

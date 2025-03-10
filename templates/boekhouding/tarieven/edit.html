@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Bewerk NZA Code{% endblock %}
+{% block content %}
+<h1>Bewerk NZA Code: {{ nza.code }}</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <h2>Werkfases</h2>
+    {{ formset.management_form }}
+    {% for form in formset %}
+        <div style="border:1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+            {{ form.as_p }}
+            {% if form.instance.pk %}
+                <label for="{{ form.prefix }}-DELETE">Verwijder:</label>
+                {{ form.DELETE }}
+            {% endif %}
+        </div>
+    {% endfor %}
+    <button type="submit">Opslaan</button>
+</form>
+{% endblock %}

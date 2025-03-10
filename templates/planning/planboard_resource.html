@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Planboard Resource View{% endblock %}
+{% block content %}
+<!-- Inline CSS voor layout -->
+<style>
+  /* Totale container: horizontale verdeling: linker sidebar en rechter kalender */
+  .planboard-container {
+    display: flex;
+    width: 100%;
+    height: calc(100vh - 150px);  /* Pas deze waarde aan op basis van jouw ERP-header/footer */
+  }
+  /* Linker sidebar: 15% breedte, en interne kolom-indeling voor header en unscheduled container */
+  #sidebar {
+    flex: 0 0 15%;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    border-right: 1px solid #ccc;
+    box-sizing: border-box;
+    overflow-y: auto;
+  }
+  /* Sidebar-header met medewerker-select en add-knop */
+  #sidebar-header {
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex-shrink: 0;
+  }
+  #employee-select {
+    width: 100%;
+    padding: 5px;
+    font-size: 1em;
+  }
+  #add-workorder {
+    width: 100%;
+    padding: 5px;
+    font-size: 1em;
+    cursor: pointer;
+  }
+  /* Unscheduled container: vult de resterende ruimte in de sidebar */
+  #unscheduled-container {
+    flex-grow: 1;
+    font-size: 0.9em;
+  }
+  #external-events {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  #external-events .fc-event.external-event {
+    padding: 5px;
+    background: #3788d8;
+    color: #fff;
+    cursor: move;
+    border-radius: 3px;
+  }
+  /* Rechter kalendercontainer */
+  #calendar-container {
+    flex: 1;
+    padding: 10px;
+    overflow: hidden;
+  }
+  #calendar {
+    width: 100%;
+    height: 100%;
+  }
+  /* Vergroot de tijdsloten in de resource view */
+  .fc-timegrid-slot {
+    height: 60px !important;
+  }
+</style>
+
+<div class="planboard-container">
+  <!-- Linker sidebar -->
+  <div id="sidebar">
+    <div id="sidebar-header">
+      <!-- Medewerker select dropdown -->
+      <select id="employee-select">
+        <option value="alle">Alle medewerkers</option>
+        <option value="Jellie">Jellie</option>
+        <option value="Sabrina">Sabrina</option>
+        <option value="Usman">Usman</option>
+        <option value="Romy">Romy</option>
+        <option value="Myrthe">Myrthe</option>
+        <option value="Ellen">Ellen</option>
+        <option value="Job">Job</option>
+      </select>
+      <!-- Knop voor nieuwe werkbon toevoegen -->
+      <button id="add-workorder">Nieuwe werkbon toevoegen</button>
+    </div>
+    <!-- Unscheduled work orders container -->
+    <div id="unscheduled-container">
+      <h3 style="margin: 0 0 10px; text-align: center;">Niet ingeplande werkbonnen</h3>
+      <div id="external-events">
+        {% for wb in unscheduled_workbonnen %}
+          <div class="fc-event external-event" id="werkbon-{{ wb.pk }}" data-id="{{ wb.pk }}" draggable="true">
+            {{ wb.werkbonnummer }}<br>
+            {% if wb.klant %}
+              {{ wb.klant.naam }}
+            {% else %}
+              Geen klant
+            {% endif %}
+          </div>
+        {% empty %}
+          <p style="text-align: center;">Geen werkbonnen</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <!-- Rechter kalendercontainer -->
+  <div id="calendar-container">
+    <div id="calendar"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Laad de benodigde FullCalendar en Scheduler bestanden -->
+<link href="{% static 'fullcalendar_scheduler/resource-timegrid.min.css' %}" rel="stylesheet" />
+<script src="{% static 'fullcalendar/js/main.min.js' %}"></script>
+<script src="{% static 'fullcalendar/js/interaction.global.min.js' %}"></script>
+<script src="{% static 'fullcalendar_scheduler/resource-timegrid.min.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("Planboard Resource View initialisatie gestart.");
+
+    // Nieuwe werkbon toevoegen: redirect naar aanmaakpagina
+    var addWorkorderButton = document.getElementById('add-workorder');
+    if (addWorkorderButton) {
+        addWorkorderButton.addEventListener('click', function() {
+            window.location.href = '/planning/aanmaken/';
+        });
+        console.log("Event listener toegevoegd aan 'add-workorder' knop.");
+    } else {
+        console.error("Knop 'add-workorder' niet gevonden.");
+    }
+
+    // Definieer de volledige lijst met resources (werknemers)
+    var allResources = [
+      { id: 'Jellie', title: 'Jellie' },
+      { id: 'Sabrina', title: 'Sabrina' },
+      { id: 'Usman', title: 'Usman' },
+      { id: 'Romy', title: 'Romy' },
+      { id: 'Myrthe', title: 'Myrthe' },
+      { id: 'Ellen', title: 'Ellen' },
+      { id: 'Job', title: 'Job' }
+    ];
+
+    // Initialiseer de FullCalendar Resource View
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
+        initialView: 'resourceTimeGridWeek',
+        slotMinTime: "08:00:00",
+        slotMaxTime: "18:00:00",
+        locale: 'nl',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'resourceTimeGridWeek,dayGridMonth,timeGridDay'
+        },
+        editable: true,
+        eventResourceEditable: true,
+        resources: allResources,
+        events: '/planning/api/werkbonnen/'
+    });
+    calendar.render();
+    console.log("Resource Calendar gerenderd.");
+
+    // Medewerker select: update resource view bij wijziging
+    var employeeSelect = document.getElementById('employee-select');
+    if (employeeSelect) {
+        employeeSelect.addEventListener('change', function() {
+            var selected = this.value;
+            if (selected === 'alle') {
+                calendar.setOption('resources', allResources);
+            } else {
+                calendar.setOption('resources', [{ id: selected, title: selected }]);
+            }
+            calendar.refetchEvents();
+            calendar.updateSize();  // Herbereken de layout
+            console.log("Geselecteerde medewerker:", selected);
+        });
+    } else {
+        console.error("Element 'employee-select' niet gevonden.");
+    }
+
+    // Maak alle externe events in de unscheduled container draggable
+    var externalEventEls = document.querySelectorAll('#external-events .fc-event.external-event');
+    externalEventEls.forEach(function(el) {
+        el.setAttribute('draggable', 'true');
+    });
+    new FullCalendar.Draggable(document.getElementById('external-events'), {
+        itemSelector: '.fc-event.external-event',
+        eventData: function(eventEl) {
+            return {
+                id: eventEl.getAttribute('data-id'),
+                title: eventEl.innerText.trim()
+            };
+        }
+    });
+    console.log("Draggable external events geactiveerd.");
+});
+</script>
+{% endblock %}

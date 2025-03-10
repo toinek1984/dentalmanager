@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Nieuwe Marketing Campagne{% endblock %}
+{% block content %}
+<h1>Nieuwe Marketing Campagne Aanmaken</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Opslaan</button>
+</form>
+{% endblock %}

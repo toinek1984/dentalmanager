@@ -1,5 +1,38 @@
 {% extends 'base.html' %}
-{% block title %}Dashboard - Boekhouding{% endblock %}
+{% load static %}
+{% block title %}Boekhouding Dashboard{% endblock %}
 {% block content %}
-  <h1>Dashboard van Boekhouding</h1>
+<h1>Boekhouding Dashboard</h1>
+<p>Welkom op het dashboard van de boekhouding.</p>
+
+<section>
+    <h2>Actieve Tarieven</h2>
+    <ul>
+        {% for tarief in tarieven %}
+            <li>
+                <strong>{{ tarief.naam }}</strong> - €{{ tarief.bedrag }}<br>
+                {% if tarief.beschrijving %}{{ tarief.beschrijving }}{% endif %}
+            </li>
+        {% empty %}
+            <li>Geen tarieven gevonden.</li>
+        {% endfor %}
+    </ul>
+</section>
+
+<section>
+    <h2>Actieve Marketing Campagnes</h2>
+    <ul>
+        {% for campagne in campagnes %}
+            <li>
+                <strong>{{ campagne.naam }}</strong> ({{ campagne.startdatum }} -
+                {% if campagne.einddatum %}{{ campagne.einddatum }}{% else %}Doorlopend{% endif %})<br>
+                Budget: €{{ campagne.budget }}<br>
+                {% if campagne.omschrijving %}{{ campagne.omschrijving }}{% endif %}
+            </li>
+        {% empty %}
+            <li>Geen campagnes gevonden.</li>
+        {% endfor %}
+    </ul>
+</section>
 {% endblock %}
+
