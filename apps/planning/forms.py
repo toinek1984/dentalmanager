@@ -1,7 +1,6 @@
 # apps/planning/forms.py
-
 from django import forms
-from .models import Werkbon
+from apps.planning.models import Werkbon
 from apps.boekhouding.tarieven.models import NZACode
 
 class WerkbonForm(forms.ModelForm):

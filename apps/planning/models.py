@@ -7,13 +7,16 @@ from apps.boekhouding.tarieven.models import NZACode
 
 # Hulpfuncties
 def generate_werkbonnummer():
-    """Genereer een uniek werkbonnummer (bv. de eerste 8 karakters van een UUID)."""
+    """
+    Genereer een uniek werkbonnummer (bv. de eerste 8 karakters van een UUID).
+    """
     return str(uuid.uuid4())[:8].upper()
 
 def generate_barcode():
-    """Genereer een barcode voorafgegaan door 'BC'."""
+    """
+    Genereer een barcode voorafgegaan door 'BC'.
+    """
     return "BC" + str(uuid.uuid4())[:10].upper()
-
 
 # --------------------------
 # Model voor Klantgegevens
@@ -46,7 +49,6 @@ class Klant(models.Model):
     def __str__(self):
         return self.naam
 
-
 # -------------------------------
 # Model voor Opdrachtgevergegevens
 # -------------------------------
@@ -61,7 +63,6 @@ class Opdrachtgever(models.Model):
 
     def __str__(self):
         return self.naam
-
 
 # --------------------------
 # Keuzelijsten voor Werkbon
@@ -97,7 +98,6 @@ FACTURABEL_GARANTIE_CHOICES = [
     ('facturabel', 'Facturabel'),
     ('garantie', 'Garantie'),
 ]
-
 
 # --------------------------
 # Werkbon Model
@@ -152,9 +152,8 @@ class Werkbon(models.Model):
     def __str__(self):
         return f"Werkbon {self.werkbonnummer}"
 
-
 # --------------------------
-# Optioneel: Tijdregistratie Model
+# Tijdregistratie Model
 # --------------------------
 class WerkUurLog(models.Model):
     werkbon = models.ForeignKey(Werkbon, on_delete=models.CASCADE, related_name='uur_logs')

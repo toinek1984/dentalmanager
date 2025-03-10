@@ -95,10 +95,13 @@ def create_werkbon(request):
             facturabel_garantie=facturabel_garantie
         )
         
+        # ----- Afhandeling (redirect) -----
         action = request.POST.get('action', 'save')
         if action == 'print':
             return redirect(reverse('werkbon_print', args=[werkbon.pk]))
         else:
             return redirect(reverse('werkbon_detail', args=[werkbon.pk]))
     
-    return render(request, 'planning/form.html')
+    # Voor een GET-request: haal de beschikbare NZACode-objecten op en geef deze mee
+    nza_codes = NZACode.objects.all()
+    return render(request, 'planning/form.html', {'nza_codes': nza_codes})

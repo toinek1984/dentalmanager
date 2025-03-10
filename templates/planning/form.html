@@ -1,8 +1,10 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Nieuwe Werkbon Aanmaken{% endblock %}
+
 {% block content %}
 <h1>Nieuwe Werkbon Aanmaken</h1>
-<form method="post">
+<form method="post" action="">
     {% csrf_token %}
     
     <!-- Klantgegevens -->
@@ -134,9 +136,9 @@
         <label for="nza_code">NZA Code:</label>
         <select id="nza_code" name="nza_code">
             <option value="">Selecteer een NZA code</option>
-            <option value="code1">Code 1</option>
-            <option value="code2">Code 2</option>
-            <option value="code3">Code 3</option>
+            {% for nz in nza_codes %}
+                <option value="{{ nz.pk }}">{{ nz.code }} - {{ nz.beschrijving }}</option>
+            {% endfor %}
         </select><br>
         
         <label for="facturabel_garantie">Facturabel of Garantie:</label>
