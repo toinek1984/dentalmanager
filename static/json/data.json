@@ -1,0 +1,6 @@
+{
+  "klanten": [
+    {"naam": "Test Klant", "adres": "Straat 123", "woonplaats": "Plaats", "telefoon": "0612345678", "email": "test@example.com"},
+    {"naam": "Andere Klant", "adres": "Straat 456", "woonplaats": "Stad", "telefoon": "0698765432", "email": "andere@example.com"}
+  ]
+}

@@ -1,15 +1,85 @@
 <header>
   <nav>
-    <ul>
-      <li><a href='/'>Home</a></li>
-      <li><a href='/boekhouding/'>Boekhouding</a></li>
-      <li><a href='/wagenpark/'>Wagenpark</a></li>
-      <li><a href='/klanten/'>Klanten</a></li>
-      <li><a href='/hr/'>HR</a></li>
-      <li><a href='/planning/'>Planning</a></li>
-      <li><a href='/magazijn/'>Magazijn</a></li>
-      <li><a href='/beheerders/'>Beheerders</a></li>
-      <li><a href='/login/'>Login</a></li>
+    <ul class="main-menu">
+      <li>
+        <button onclick="location.href='/'" class="btn">Home</button>
+      </li>
+      <li class="dropdown">
+        <button class="btn dropdown-btn">Boekhouding</button>
+        <ul class="submenu">
+          <li><a href="/boekhouding/crediteuren/">Crediteuren</a></li>
+          <li><a href="/boekhouding/debiteuren/">Debiteuren</a></li>
+          <li><a href="/boekhouding/facturatie/">Facturatie</a></li>
+          <li><a href="/boekhouding/grootboekrekeningen/">Grootboekrekeningen</a></li>
+          <li><a href="/boekhouding/kunstgebitaanhuis/">Kunstgebitaanhuis</a></li>
+          <li><a href="/boekhouding/laboratorium/">Laboratorium</a></li>
+          <li><a href="/boekhouding/marketing/">Marketing</a></li>
+          <li><a href="/boekhouding/tarieven/">Tarieven</a></li>
+          <li><a href="/boekhouding/totaal_overzicht/">Totaal Overzicht</a></li>
+        </ul>
+      </li>
+      <li>
+        <button onclick="location.href='/wagenpark/'" class="btn">Wagenpark</button>
+      </li>
+      <!-- Klanten dropdown met submenus -->
+      <li class="dropdown">
+        <button class="btn dropdown-btn">Klanten</button>
+        <ul class="submenu">
+          <li><a href="/klanten/klantdossier/">Klantendossier</a></li>
+          <li><a href="/klanten/klantenoverzicht/">Klantenoverzicht</a></li>
+          <li><a href="/klanten/klantaanmaken/">Klantaanmaken</a></li>
+        </ul>
+      </li>
+      <li>
+        <button onclick="location.href='/hr/'" class="btn">HR</button>
+      </li>
+      <li class="dropdown">
+        <button class="btn dropdown-btn">Planning</button>
+        <ul class="submenu">
+          <li><a href="/planning/aanmaken/">Werkbon Aanmaken</a></li>
+          <li><a href="/planning/planning_behandelaren/">Behandelaren</a></li>
+          <li><a href="/planning/planning_freesmachine/">Freesmachine</a></li>
+          <li><a href="/planning/planning_laboratorium/">Laboratorium</a></li>
+          <li><a href="/planning/werkbon_overzicht/">Werkbon Overzicht</a></li>
+          <li><a href="/planning/planboard/">Planboard</a></li>
+        </ul>
+      </li>
+      <li>
+        <button onclick="location.href='/magazijn/'" class="btn">Magazijn</button>
+      </li>
+      <li>
+        <button onclick="location.href='/beheerders/'" class="btn">Beheerders</button>
+      </li>
+      <li>
+        <button onclick="location.href='/accounts/login/'" class="btn">Login</button>
+      </li>
     </ul>
   </nav>
 </header>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var dropdownBtns = document.querySelectorAll('.dropdown-btn');
+    dropdownBtns.forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var submenu = this.nextElementSibling;
+        if (submenu.style.display === 'block') {
+          submenu.style.display = 'none';
+        } else {
+          // Sluit eerst alle andere submenus
+          document.querySelectorAll('.submenu').forEach(function(menu) {
+            menu.style.display = 'none';
+          });
+          submenu.style.display = 'block';
+        }
+      });
+    });
+    // Sluit submenus als ergens anders wordt geklikt
+    document.addEventListener('click', function() {
+      document.querySelectorAll('.submenu').forEach(function(menu) {
+        menu.style.display = 'none';
+      });
+    });
+  });
+</script>

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Welkom bij Kunstgebit aan Huis{% endblock %}
+
+{% block content %}
+<div class="home-container" style="text-align: center; margin-top: 50px;">
+  <!-- Logo -->
+  <img src="{% static 'images/kunstgebit_logo.png' %}" alt="Kunstgebit aan Huis Logo" style="max-width: 200px;">
+  
+  <h1>Welkom bij Kunstgebit aan Huis</h1>
+  <p>Welkom op de homepagina. Gebruik het menu om te navigeren.</p>
+  
+  {# De login-knop is verwijderd #}
+</div>
+{% endblock %}

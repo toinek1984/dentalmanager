@@ -10,79 +10,47 @@
     <!-- Klantgegevens -->
     <fieldset>
         <legend>Klantgegevens</legend>
-        <label for="klant_naam">Klantnaam (zoeken of toevoegen):</label>
-        <input type="text" id="klant_naam" name="klant_naam" required><br>
+        <label for="klant_zoekveld">Klantnaam (zoeken of toevoegen):</label>
+        <input type="hidden" id="klant_id" name="klant_id">
+        <input type="text" id="klant_zoekveld" name="klant_naam" placeholder="Zoek klant..." autocomplete="on">
+        <div id="klant_resultaten" style="display:none; border:1px solid #ccc; padding:5px;"></div>
+        <button type="button" id="toggleNieuweKlant">+ Nieuwe Klant</button><br>
         
-        <label for="klant_adres">Adres:</label>
-        <input type="text" id="klant_adres" name="klant_adres"><br>
-        
-        <label for="klant_woonplaats">Woonplaats:</label>
-        <input type="text" id="klant_woonplaats" name="klant_woonplaats"><br>
-        
-        <label for="klant_geboortedatum">Geboortedatum:</label>
-        <input type="date" id="klant_geboortedatum" name="klant_geboortedatum"><br>
-        
-        <label for="klant_telefoon">Telefoonnummer:</label>
-        <input type="text" id="klant_telefoon" name="klant_telefoon"><br>
-        
-        <label for="klant_email">Email:</label>
-        <input type="email" id="klant_email" name="klant_email"><br>
-        
-        <label for="klant_verzekeringsnummer">Verzekeringsnummer:</label>
-        <input type="text" id="klant_verzekeringsnummer" name="klant_verzekeringsnummer"><br>
-        
-        <label for="mantelzorger">Heeft mantelzorger?</label>
-        <input type="checkbox" id="mantelzorger" name="mantelzorger"><br>
-        
-        <label for="mantelzorger_naam">Mantelzorger Naam:</label>
-        <input type="text" id="mantelzorger_naam" name="mantelzorger_naam"><br>
-        
-        <label for="mantelzorger_telefoon">Mantelzorger Telefoon:</label>
-        <input type="text" id="mantelzorger_telefoon" name="mantelzorger_telefoon"><br>
-        
-        <label for="mantelzorger_geboortedatum">Mantelzorger Geboortedatum:</label>
-        <input type="date" id="mantelzorger_geboortedatum" name="mantelzorger_geboortedatum"><br>
-        
-        <label for="onder_bewind">Onder bewind?</label>
-        <input type="checkbox" id="onder_bewind" name="onder_bewind"><br>
-        
-        <label for="klant_herkomst">Hoe is de klant bij ons gekomen?</label>
-        <select id="klant_herkomst" name="klant_herkomst">
-            <option value="">Selecteer</option>
-            <option value="google">Google</option>
-            <option value="facebook">Facebook</option>
-            <option value="krant">Krant</option>
-            <option value="radio">Radio</option>
-            <option value="viavia">Viavia</option>
-            <option value="folder">Folder</option>
-            <option value="sponsoring">Sponsoring</option>
-            <option value="anders">Anders</option>
-        </select><br>
+        <!-- Nieuwe klant gegevens, standaard verborgen -->
+        <div id="nieuwe_klant_form" style="display:none; margin-top:10px;">
+            <label for="nieuwe_klant_adres">Adres:</label>
+            <input type="text" id="nieuwe_klant_adres" name="nieuwe_klant_adres"><br>
+            <label for="nieuwe_klant_woonplaats">Woonplaats:</label>
+            <input type="text" id="nieuwe_klant_woonplaats" name="nieuwe_klant_woonplaats"><br>
+            <label for="nieuwe_klant_geboortedatum">Geboortedatum:</label>
+            <input type="date" id="nieuwe_klant_geboortedatum" name="nieuwe_klant_geboortedatum"><br>
+            <label for="nieuwe_klant_telefoon">Telefoonnummer:</label>
+            <input type="text" id="nieuwe_klant_telefoon" name="nieuwe_klant_telefoon"><br>
+            <label for="nieuwe_klant_email">Email:</label>
+            <input type="email" id="nieuwe_klant_email" name="nieuwe_klant_email"><br>
+            <label for="nieuwe_klant_verzekeringsnummer">Verzekeringsnummer:</label>
+            <input type="text" id="nieuwe_klant_verzekeringsnummer" name="nieuwe_klant_verzekeringsnummer"><br>
+        </div>
     </fieldset>
     
     <!-- Opdrachtgevergegevens -->
     <fieldset>
         <legend>Opdrachtgevergegevens</legend>
-        <label for="opdrachtgever_naam">Opdrachtgever Naam:</label>
-        <input type="text" id="opdrachtgever_naam" name="opdrachtgever_naam"><br>
+        <label for="opdrachtgever_zoekveld">Opdrachtgever Naam (zoeken of toevoegen):</label>
+        <input type="hidden" id="opdrachtgever_id" name="opdrachtgever_id">
+        <input type="text" id="opdrachtgever_zoekveld" name="opdrachtgever_naam" placeholder="Zoek opdrachtgever..." autocomplete="on">
+        <div id="opdrachtgever_resultaten" style="display:none; border:1px solid #ccc; padding:5px;"></div>
+        <button type="button" id="toggleNieuweOpdrachtgever">+ Nieuwe Opdrachtgever</button><br>
         
-        <label for="opdrachtgever_adres">Opdrachtgever Adres:</label>
-        <input type="text" id="opdrachtgever_adres" name="opdrachtgever_adres"><br>
-        
-        <label for="opdrachtgever_telefoon">Opdrachtgever Telefoon:</label>
-        <input type="text" id="opdrachtgever_telefoon" name="opdrachtgever_telefoon"><br>
-        
-        <label for="opdrachtgever_email">Opdrachtgever Email:</label>
-        <input type="email" id="opdrachtgever_email" name="opdrachtgever_email"><br>
-        
-        <label for="opdrachtgever_kvk">Opdrachtgever KvK:</label>
-        <input type="text" id="opdrachtgever_kvk" name="opdrachtgever_kvk"><br>
-        
-        <label for="opdrachtgever_contactpersoon">Opdrachtgever Contactpersoon:</label>
-        <input type="text" id="opdrachtgever_contactpersoon" name="opdrachtgever_contactpersoon"><br>
-        
-        <label for="opdrachtgever_woonplaats">Opdrachtgever Woonplaats:</label>
-        <input type="text" id="opdrachtgever_woonplaats" name="opdrachtgever_woonplaats"><br>
+        <!-- Nieuwe opdrachtgever gegevens, standaard verborgen -->
+        <div id="nieuwe_opdrachtgever_form" style="display:none; margin-top:10px;">
+            <label for="nieuwe_opdrachtgever_adres">Adres:</label>
+            <input type="text" id="nieuwe_opdrachtgever_adres" name="nieuwe_opdrachtgever_adres"><br>
+            <label for="nieuwe_opdrachtgever_telefoon">Telefoon:</label>
+            <input type="text" id="nieuwe_opdrachtgever_telefoon" name="nieuwe_opdrachtgever_telefoon"><br>
+            <label for="nieuwe_opdrachtgever_email">Email:</label>
+            <input type="email" id="nieuwe_opdrachtgever_email" name="nieuwe_opdrachtgever_email"><br>
+        </div>
     </fieldset>
     
     <!-- Werkbon Specifieke Gegevens -->
@@ -163,7 +131,19 @@
         <label for="marketing_optie">Marketing Optie:</label>
         <select id="marketing_optie" name="marketing_optie">
             <option value="">Selecteer marketing optie</option>
-            <!-- Deze opties worden gefilterd via JavaScript -->
+        </select><br>
+        
+        <label for="klant_herkomst">Hoe is de klant bij ons gekomen?</label>
+        <select id="klant_herkomst" name="klant_herkomst">
+            <option value="">Selecteer</option>
+            <option value="google">Google</option>
+            <option value="facebook">Facebook</option>
+            <option value="krant">Krant</option>
+            <option value="radio">Radio</option>
+            <option value="viavia">Viavia</option>
+            <option value="folder">Folder</option>
+            <option value="sponsoring">Sponsoring</option>
+            <option value="anders">Anders</option>
         </select><br>
     </fieldset>
     
@@ -175,36 +155,89 @@
 
 {% block extra_js %}
 <script>
-  // Voorbeelddata voor marketingcampagnes, normaal geladen via de backend
-  var marketingCampagnes = [
-    {id: 1, naam: "Campagne A", provincie: "Groningen"},
-    {id: 2, naam: "Campagne B", provincie: "Friesland"},
-    {id: 3, naam: "Campagne C", provincie: "Groningen"},
-    {id: 4, naam: "Campagne D", provincie: "Friesland"}
-  ];
-
-  document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function() {
+    // Toggle nieuwe klantformulier inline
+    var toggleNieuweKlantBtn = document.getElementById("toggleNieuweKlant");
+    var nieuweKlantForm = document.getElementById("nieuwe_klant_form");
+    toggleNieuweKlantBtn.addEventListener("click", function() {
+        nieuweKlantForm.style.display = (nieuweKlantForm.style.display === "none" || nieuweKlantForm.style.display === "") ? "block" : "none";
+    });
+    
+    // Toggle nieuwe opdrachtgeverformulier inline
+    var toggleNieuweOpdrachtgeverBtn = document.getElementById("toggleNieuweOpdrachtgever");
+    var nieuweOpdrachtgeverForm = document.getElementById("nieuwe_opdrachtgever_form");
+    toggleNieuweOpdrachtgeverBtn.addEventListener("click", function() {
+        nieuweOpdrachtgeverForm.style.display = (nieuweOpdrachtgeverForm.style.display === "none" || nieuweOpdrachtgeverForm.style.display === "") ? "block" : "none";
+    });
+    
+    // Marketing-opties filteren op provincie
     var provincieSelect = document.getElementById("provincie");
     var marketingSelect = document.getElementById("marketing_optie");
-
     provincieSelect.addEventListener("change", function() {
-      var gekozenProvincie = this.value;
-      // Maak de marketing dropdown leeg
-      marketingSelect.innerHTML = '<option value="">Selecteer marketing optie</option>';
-      
-      // Filter marketingcampagnes op basis van de gekozen provincie
-      var gefilterdeCampagnes = marketingCampagnes.filter(function(campagne) {
-        return campagne.provincie === gekozenProvincie;
-      });
-      
-      // Voeg de gefilterde campagnes toe aan de dropdown
-      gefilterdeCampagnes.forEach(function(campagne) {
-        var option = document.createElement("option");
-        option.value = campagne.id;
-        option.text = campagne.naam;
-        marketingSelect.appendChild(option);
-      });
+        var gekozenProvincie = this.value;
+        marketingSelect.innerHTML = '<option value="">Selecteer marketing optie</option>';
+        // Voorbeelddata voor marketingcampagnes – vervang dit door dynamische data als dat mogelijk is
+        var marketingCampagnes = [
+            {id: 1, naam: "Campagne A", provincie: "Groningen"},
+            {id: 2, naam: "Campagne B", provincie: "Friesland"},
+            {id: 3, naam: "Campagne C", provincie: "Groningen"},
+            {id: 4, naam: "Campagne D", provincie: "Friesland"}
+        ];
+        var gefilterdeCampagnes = marketingCampagnes.filter(function(campagne) {
+            return campagne.provincie === gekozenProvincie;
+        });
+        gefilterdeCampagnes.forEach(function(campagne) {
+            var option = document.createElement("option");
+            option.value = campagne.id;
+            option.text = campagne.naam;
+            marketingSelect.appendChild(option);
+        });
     });
-  });
+    
+    // Klant zoeken functie
+    var klantZoekveld = document.getElementById("klant_zoekveld");
+    var klantResultaten = document.getElementById("klant_resultaten");
+    
+    klantZoekveld.addEventListener("input", function() {
+        var zoekterm = this.value.trim();
+        if (zoekterm.length < 2) {
+            klantResultaten.style.display = "none";
+            return;
+        }
+    
+        fetch(`/klanten/json/?q=${encodeURIComponent(zoekterm)}`)
+            .then(response => response.json())
+            .then(function(data) {
+                klantResultaten.innerHTML = ""; // Wis vorige resultaten
+                if (data.length === 0) {
+                    klantResultaten.innerHTML = "<p>Geen klanten gevonden</p>";
+                } else {
+                    data.forEach(function(klant) {
+                        var div = document.createElement("div");
+                        div.textContent = `${klant.naam} - ${klant.woonplaats}`;
+                        div.style.padding = "5px";
+                        div.style.cursor = "pointer";
+                        div.addEventListener("click", function() {
+                            klantZoekveld.value = klant.naam;
+                            document.getElementById("klant_id").value = klant.id;
+                            klantResultaten.style.display = "none";
+                        });
+                        klantResultaten.appendChild(div);
+                    });
+                }
+                klantResultaten.style.display = "block";
+            })
+            .catch(function(error) {
+                console.error("Fout bij ophalen klanten:", error);
+            });
+    });
+    
+    // Verberg klantresultaten wanneer buiten het zoekveld wordt geklikt
+    document.addEventListener("click", function(event) {
+        if (!klantZoekveld.contains(event.target) && !klantResultaten.contains(event.target)) {
+            klantResultaten.style.display = "none";
+        }
+    });
+});
 </script>
 {% endblock %}

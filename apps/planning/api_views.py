@@ -7,6 +7,9 @@ from apps.planning.models import Werkbon
 from datetime import datetime
 from django.http import JsonResponse
 from apps.planning.models import Werkbon
+from django.http import JsonResponse
+from apps.hr.werknemers.models import Werknemer  # ✅ Correct
+
 
 def werkbon_list(request):
     # Stel hier eventueel filters in, bijvoorbeeld:
@@ -43,3 +46,9 @@ def update_werkbon(request, pk):
         except Exception as e:
             return HttpResponseBadRequest(str(e))
     return HttpResponseBadRequest("Invalid method.")
+
+def api_resources(request):
+    """ Geeft een JSON-lijst met alle medewerkers terug voor FullCalendar. """
+    werknemers = Werknemer.objects.all().values('id', 'naam')
+    data = [{'id': w['id'], 'title': w['naam']} for w in werknemers]
+    return JsonResponse(data, safe=False)

@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}Klantendossier: {{ dossier.voornaam }} {{ dossier.achternaam }}{% endblock %}
+
+{% block content %}
+<h1>Klantendossier: {{ dossier.voornaam }} {{ dossier.achternaam }}</h1>
+
+<section class="dossier-basic-info">
+  <p><strong>Klantnummer:</strong> {{ dossier.klantnummer }}</p>
+  <p><strong>Geboortedatum:</strong> {% if dossier.geboortedatum %}{{ dossier.geboortedatum|date:"d-m-Y" }}{% else %}Niet ingevuld{% endif %}</p>
+  <p><strong>Adres:</strong> {{ dossier.straat }} {{ dossier.huisnummer }}, {{ dossier.postcode }} {{ dossier.woonplaats }}</p>
+  <p><strong>Telefoon:</strong> {{ dossier.telefoonnummer }}</p>
+  <p><strong>Email:</strong> {{ dossier.emailadres }}</p>
+  <p><strong>Zorginstelling:</strong> {% if dossier.zorginstelling %}{{ dossier.zorginstelling }}{% else %}Niet van toepassing{% endif %}</p>
+</section>
+
+<section class="dossier-extra-info">
+  <h2>Aanvullende Informatie</h2>
+  <p><strong>Onder bewind:</strong> {{ dossier.onder_bewind|yesno:"Ja,Nee" }}</p>
+  {% if dossier.onder_bewind %}
+    <p><strong>Bewindvoerder Naam:</strong> {{ dossier.bewindvoerder_naam }}</p>
+    <p><strong>Bewindvoerder Adres:</strong> {{ dossier.bewindvoerder_adres }}</p>
+    <p><strong>Bewindvoerder Telefoon:</strong> {{ dossier.bewindvoerder_telefoon }}</p>
+    <p><strong>Bewindvoerder Email:</strong> {{ dossier.bewindvoerder_email }}</p>
+  {% endif %}
+  <p><strong>Verzekeringsnummer:</strong> {{ dossier.verzekeringsnummer }}</p>
+</section>
+
+<!-- Notities sectie met inline formulier -->
+<section class="dossier-notities">
+  <h2>Notities</h2>
+  {% if dossier.notities.all %}
+    <ul>
+      {% for notitie in dossier.notities.all %}
+        <li>
+          {{ notitie.tekst }} <em>({{ notitie.created_at|date:"d-m-Y H:i" }})</em>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Er zijn nog geen notities toegevoegd.</p>
+  {% endif %}
+  
+  <!-- Inline notitieformulier -->
+  <h3>Voeg direct een nieuwe notitie toe</h3>
+  <form method="post">
+    {% csrf_token %}
+    {{ note_form.as_p }}
+    <button type="submit" name="add_note" class="btn btn-success">Notitie Opslaan</button>
+  </form>
+</section>
+
+<!-- Acties sectie met knoppen -->
+<section class="dossier-actions">
+  <h2>Acties</h2>
+  <div>
+    <button type="button" class="btn btn-info"
+      onclick="location.href='{% url 'klanten:dossier_edit' dossier.klantnummer %}'">
+      Bewerk Dossier
+    </button>
+  </div>
+  <div>
+    <button type="button" class="btn btn-primary"
+      onclick="location.href='/planning/aanmaken/?dossier={{ dossier.klantnummer }}'">
+      Open Werkbon Formulier
+    </button>
+  </div>
+  <div>
+    <!-- Voor de Overleden-knop gebruiken we een formulier omdat dit een POST-request vereist -->
+    <form action="{% url 'klanten:mark_overleden' dossier.klantnummer %}" method="post" style="display:inline;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-warning">
+        Markeer als Overleden
+      </button>
+    </form>
+  </div>
+</section>
+
+<section class="dossier-history">
+  <h2>Werkbon Geschiedenis</h2>
+  {% if dossier.werkbon_geschiedenis %}
+    <ul>
+      {% for wb in dossier.werkbon_geschiedenis %}
+        <li>Werkbon ID: {{ wb.werkbon_id }} - Datum: {{ wb.datum }} - Status: {{ wb.status }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Geen werkbonhistorie beschikbaar.</p>
+  {% endif %}
+
+  <h2>Factuur Geschiedenis</h2>
+  {% if dossier.factuur_geschiedenis %}
+    <ul>
+      {% for factuur in dossier.factuur_geschiedenis %}
+        <li>Factuur ID: {{ factuur.factuur_id }} - Datum: {{ factuur.datum }} - Bedrag: {{ factuur.bedrag }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Geen factuurhistorie beschikbaar.</p>
+  {% endif %}
+</section>
+
+<!-- Terug naar lijst knop -->
+<button type="button" class="btn btn-secondary"
+  onclick="location.href='{% url 'klanten:dossier_list' %}'">
+  Terug naar lijst
+</button>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Klantenoverzicht{% endblock %}
+
+{% block content %}
+<h1>Klantenoverzicht</h1>
+
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Naam</th>
+        <th>Adres</th>
+        <th>Woonplaats</th>
+        <th>Telefoon</th>
+        <th>Email</th>
+    </tr>
+    {% for klant in klanten %}
+    <tr>
+        <td>{{ klant.id }}</td>
+        <td>{{ klant.naam }}</td>
+        <td>{{ klant.adres }}</td>
+        <td>{{ klant.woonplaats }}</td>
+        <td>{{ klant.telefoon }}</td>
+        <td>{{ klant.email }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="6">Geen klanten gevonden.</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

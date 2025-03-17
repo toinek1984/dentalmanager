@@ -2,180 +2,151 @@
 {% load static %}
 {% block title %}Planboard{% endblock %}
 {% block content %}
-<!-- Voeg deze CSS toe voor de layout -->
 
 <style>
-  /* Bepaal de totale beschikbare hoogte. 
-     Pas de waarden hieronder aan op basis van de hoogte van jouw ERP-header en -footer.
-     Bijvoorbeeld: als de ERP-header 80px en de ERP-footer 70px is, dan gebruiken we: */
   .planboard-container {
     display: flex;
     width: 100%;
-    height: calc(100vh - 80px - 70px - 20px); /* 20px extra marge */
+    height: calc(100vh - 80px - 70px - 20px);
   }
-  /* Unscheduled container links (smal) */
-  #unscheduled-container {
+  #sidebar {
     flex: 0 0 15%;
+    display: flex;
+    flex-direction: column;
     padding: 10px;
     border-right: 1px solid #ccc;
     overflow-y: auto;
   }
-  /* Kalendercontainer rechts */
   #calendar-container {
     flex: 1;
     padding: 10px;
     overflow: auto;
   }
-  /* Zorg dat de FullCalendar-div alle beschikbare ruimte gebruikt */
   #calendar {
     width: 100%;
     height: 100%;
   }
-  /* Vergroot de tijdsloten in de FullCalendar resource view */
-  .fc-timegrid-slot {
-    height: 60px !important;
-  }
 </style>
 
-
 <div class="planboard-container">
-    <!-- Unsheduled work orders container -->
-    <div id="unscheduled-container">
-        <h2 style="font-size: 1em; margin: 0 0 10px;">Niet ingeplande werkbonnen</h2>
-        <div id="external-events" style="display: flex; gap: 10px; flex-wrap: wrap;">
-            {% for wb in unscheduled_workbonnen %}
-                <div class="fc-event external-event" id="werkbon-{{ wb.pk }}" data-id="{{ wb.pk }}" 
-                     style="padding: 5px; background: #3788d8; color: #fff; cursor: move;" draggable="true">
-                    {{ wb.werkbonnummer }}<br>
-                    {% if wb.klant %}
-                        {{ wb.klant.naam }}
-                    {% else %}
-                        Geen klant
-                    {% endif %}
-                </div>
-            {% empty %}
-                <p>Geen werkbonnen</p>
-            {% endfor %}
+    <div id="sidebar">
+        <div id="sidebar-header">
+            <h3>Medewerker selectie</h3>
+            <select id="employee-select">
+                <option value="alle">Alle medewerkers</option>
+                {% for werknemer in werknemers %}
+                    <option value="{{ werknemer.id }}">{{ werknemer.naam }}</option>
+                {% endfor %}
+            </select>
+            <button id="add-workorder">Nieuwe werkbon toevoegen</button>
+        </div>
+        <div id="unscheduled-container">
+            <h2>Niet ingeplande werkbonnen</h2>
+            <div id="external-events">
+                {% for wb in unscheduled_workbonnen %}
+                    <div class="fc-event external-event" id="werkbon-{{ wb.pk }}" data-id="{{ wb.pk }}" draggable="true">
+                        {{ wb.werkbonnummer }}<br>
+                        {% if wb.klant %}
+                            {{ wb.klant.naam }}
+                        {% else %}
+                            Geen klant
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    <p>Geen werkbonnen</p>
+                {% endfor %}
+            </div>
         </div>
     </div>
-    <!-- Calendar container -->
+
     <div id="calendar-container">
         <div id="calendar"></div>
     </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
-<!-- Laad de FullCalendar bestanden -->
-<link href="{% static 'fullcalendar/css/main.min.css' %}" rel="stylesheet" />
+<!-- ✅ Laad de FullCalendar-bestanden -->
+<link href="{% static 'fullcalendar_scheduler/resource-timegrid.min.css' %}" rel="stylesheet" />
 <script src="{% static 'fullcalendar/js/main.min.js' %}"></script>
 <script src="{% static 'fullcalendar/js/interaction.global.min.js' %}"></script>
+<script src="{% static 'fullcalendar_scheduler/resource-timegrid.min.js' %}"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("Planboard initialisatie gestart.");
+    console.log("Planboard geladen.");
 
-    // Basis API URL voor werkbonnen
-    const baseApiUrl = '/planning/api/werkbonnen/';
-    function getEventsUrl(colleague) {
-        return baseApiUrl + '?collega=' + encodeURIComponent(colleague);
+    var addWorkorderButton = document.getElementById('add-workorder');
+    if (addWorkorderButton) {
+        addWorkorderButton.addEventListener('click', function() {
+            window.location.href = '/planning/aanmaken/';
+        });
     }
 
-    // Initialiseer FullCalendar
+    var employeeSelect = document.getElementById('employee-select');
+
     const calendarEl = document.getElementById('calendar');
-    if (!calendarEl) {
-        console.error("Calendar container niet gevonden!");
-        return;
-    }
-    
     const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'timeGridWeek',
+        schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
+        initialView: 'resourceTimeGridWeek',
         locale: 'nl',
         height: '100%',
+        editable: true,
+        droppable: true,
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
-            right: 'timeGridWeek,dayGridMonth,timeGridDay'
+            right: 'resourceTimeGridWeek,dayGridMonth,timeGridDay'
         },
-        editable: true,
-        droppable: true,
-        events: getEventsUrl('alle'),
+        resources: '/planning/api/resources/', // ✅ Medewerkers correct laden
+        events: '/planning/api/werkbonnen/',
+
         eventDrop: function(info) {
-            console.log("Event verplaatst:", info.event);
-            const newStart = info.event.start.toISOString().split("T")[0];
             fetch(`/planning/api/werkbonnen/${info.event.id}/update/`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({ 'start': newStart })
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                body: JSON.stringify({ 
+                    'start': info.event.start.toISOString(),
+                    'resourceId': info.event.getResources()[0].id 
+                })
             })
-            .then(response => {
-                if (!response.ok) {
-                    alert('Fout bij het updaten van de werkbon.');
-                    info.revert();
-                }
+            .then(response => response.json())
+            .then(data => {
+                console.log("Werkbon geüpdatet:", data);
+                calendar.refetchEvents();
+                updateResourceView(); // ✅ Roep update aan in planboard_resource.html
             })
             .catch(() => {
                 alert('Fout bij het updaten van de werkbon.');
                 info.revert();
             });
-        },
-        drop: function(info) {
-            console.log("Extern event gedropt op kalender:", info);
-            const draggedEl = info.draggedEl;
-            const eventId = draggedEl.getAttribute('data-id');
-            const newDate = info.dateStr;
-            fetch(`/planning/api/werkbonnen/${eventId}/update/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({ 'start': newDate })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    alert('Fout bij het plannen van de werkbon.');
-                } else {
-                    calendar.refetchEvents();
-                    if (draggedEl.parentNode) {
-                        draggedEl.parentNode.removeChild(draggedEl);
-                    }
-                }
-            })
-            .catch(() => {
-                alert('Fout bij het plannen van de werkbon.');
-            });
         }
     });
-    
+
     calendar.render();
-    console.log("Kalender gerenderd.");
 
-    // Zorg dat alle externe events expliciet draggable zijn
-    const externalEventEls = document.querySelectorAll('#external-events .fc-event.external-event');
-    externalEventEls.forEach(el => {
-        el.setAttribute('draggable', 'true');
+    employeeSelect.addEventListener('change', function() {
+        var selected = this.value;
+        var url = (selected === 'alle') ? '/planning/api/werkbonnen/' : `/planning/api/werkbonnen/?medewerker=${selected}`;
+        calendar.refetchEvents();
     });
-    console.log("Alle externe events zijn nu expliciet draggable.");
 
-    // Initialiseer Draggable voor externe events
-    const containerEl = document.getElementById('external-events');
-    if (containerEl) {
-        new FullCalendar.Draggable(containerEl, {
-            itemSelector: '.fc-event.external-event',
-            eventData: function(eventEl) {
-                return {
-                    id: eventEl.getAttribute('data-id'),
-                    title: eventEl.innerText.trim()
-                };
-            }
+    function updateResourceView() {
+        fetch('/planning/api/update_resources/')
+        .then(response => response.json())
+        .then(data => {
+            console.log("Resources bijgewerkt:", data);
+            window.parent.postMessage({ action: 'refresh_resource_view' }, '*'); // ✅ Stuur update naar planboard_resource.html
         });
-        console.log("Draggable external events geactiveerd.");
-    } else {
-        console.error("Container voor externe events niet gevonden.");
     }
+
+    window.addEventListener('message', function(event) {
+        if (event.data.action === 'refresh_resource_view') {
+            console.log("Resource view herladen.");
+            calendar.refetchEvents();
+        }
+    });
 });
 </script>
 {% endblock %}

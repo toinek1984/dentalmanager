@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Voeg Notitie Toe voor Dossier {{ dossier.klantnummer }}{% endblock %}
+
+{% block content %}
+<h1>Voeg Notitie Toe voor {{ dossier.voornaam }} {{ dossier.achternaam }} (Dossier {{ dossier.klantnummer }})</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Notitie Opslaan</button>
+</form>
+
+<a href="{% url 'klanten:dossier_detail' dossier.klantnummer %}" class="btn btn-secondary">Annuleer</a>
+{% endblock %}

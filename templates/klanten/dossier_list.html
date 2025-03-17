@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Klantendossiers{% endblock %}
+{% block content %}
+<h1>Klantendossiers</h1>
+<a href="{% url 'klanten:dossier_create' %}">Nieuw dossier aanmaken</a>
+<ul>
+    {% for dossier in dossiers %}
+        <li>
+            <a href="{% url 'klanten:dossier_detail' dossier.klantnummer %}">
+                {{ dossier.voornaam }} {{ dossier.achternaam }} - {{ dossier.woonplaats }}
+            </a>
+        </li>
+    {% empty %}
+        <li>Geen dossiers gevonden.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

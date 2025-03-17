@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Bewerk Klantendossier: {{ dossier.voornaam }} {{ dossier.achternaam }}{% endblock %}
+
+{% block content %}
+<h1>Bewerk Klantendossier</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Opslaan</button>
+</form>
+
+<a href="{% url 'klanten:dossier_detail' dossier.klantnummer %}" class="btn btn-secondary">Annuleer</a>
+{% endblock %}

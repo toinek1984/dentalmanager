@@ -1,5 +1,12 @@
 {% extends 'base.html' %}
-{% block title %}Index - Klanten{% endblock %}
+{% block title %}Klantenoverzicht{% endblock %}
 {% block content %}
-  <h1>Indexpagina van Klanten</h1>
+<h1>Klantenoverzicht</h1>
+<ul>
+    {% for klant in klanten %}
+        <li>{{ klant.naam }} - {{ klant.woonplaats }}</li>
+    {% empty %}
+        <li>Geen klanten gevonden.</li>
+    {% endfor %}
+</ul>
 {% endblock %}

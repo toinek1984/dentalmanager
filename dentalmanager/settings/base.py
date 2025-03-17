@@ -1,5 +1,8 @@
-from pathlib import Path
 import os
+from pathlib import Path
+
+LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/accounts/login/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -9,6 +12,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = 'jouw-geheime-sleutel'
 DEBUG = True
 ALLOWED_HOSTS = []
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -17,6 +23,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_otp',
+    'django_otp.plugins.otp_static',
+    'django_otp.plugins.otp_totp',
+    'two_factor',  # of 'django_two_factor' afhankelijk van de package-versie
     # Apps
     'apps.boekhouding',
     'apps.boekhouding.tarieven.apps.TarievenConfig',
@@ -24,6 +34,7 @@ INSTALLED_APPS = [
     'apps.wagenpark',
     'apps.klanten',
     'apps.hr',
+    'apps.hr.werknemers',
     'apps.planning',
     'apps.magazijn',
     'apps.beheerderspagina',
@@ -68,7 +79,30 @@ DATABASES = {
     }
 }
 
-STATIC_URL = '/static/'
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
 
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+LANGUAGE_CODE = 'nl-NL'
+
+TIME_ZONE = 'Europe/Amsterdam'
+
+USE_I18N = True
+USE_L10N = True
+USE_TZ = True
+
+STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / "media"
 
