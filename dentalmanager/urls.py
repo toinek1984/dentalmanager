@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from apps.home.views import home  # pas aan als je de home-view in een andere app hebt
+from apps.home.views import home  # Zorg dat deze view bestaat
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -10,11 +10,12 @@ urlpatterns = [
     path('wagenpark/', include('apps.wagenpark.urls')),
     path('klanten/', include('apps.klanten.urls')),
     path('hr/', include('apps.hr.urls')),
-    path('planning/', include('apps.planning.urls')),
-    path('planning/aanmaken/', include(('apps.planning.aanmaken_werkbon.urls', 'aanmaken_werkbon'), namespace='planning')),
+    # Zorg dat apps/planning/urls.py bovenaan een app_name heeft
+    path('planning/', include('apps.planning.urls', namespace='planning')),
+    # Voor de sub-app aanmaken_werkbon, gebruik een andere namespace:
+    path('planning/aanmaken/', include(('apps.planning.aanmaken_werkbon.urls', 'aanmaken_werkbon'), namespace='aanmaken_werkbon')),
     path('magazijn/', include('apps.magazijn.urls')),
     path('beheerders/', include('apps.beheerderspagina.urls')),
     path('login/', include('apps.log_in_pagina.urls')),
-    path('klantdossier/', include('apps.klanten.urls')),
-
+    path('klantdossier/', include(('apps.klanten.klantdossier.urls', 'klantdossier'), namespace='klantdossier')),
 ]

@@ -1,13 +1,15 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block title %}Planboard{% endblock %}
-{% block content %}
 
+{% block content %}
+<!-- Stijlen voor de planboard pagina -->
 <style>
   .planboard-container {
     display: flex;
     width: 100%;
-    height: calc(100vh - 80px - 70px - 20px);
+    /* Houd rekening met de hoogte van header en footer (pas indien nodig aan) */
+    height: calc(100vh - 170px);
   }
   #sidebar {
     flex: 0 0 15%;
@@ -29,54 +31,57 @@
 </style>
 
 <div class="planboard-container">
-    <div id="sidebar">
-        <div id="sidebar-header">
-            <h3>Medewerker selectie</h3>
-            <select id="employee-select">
-                <option value="alle">Alle medewerkers</option>
-                {% for werknemer in werknemers %}
-                    <option value="{{ werknemer.id }}">{{ werknemer.naam }}</option>
-                {% endfor %}
-            </select>
-            <button id="add-workorder">Nieuwe werkbon toevoegen</button>
-        </div>
-        <div id="unscheduled-container">
-            <h2>Niet ingeplande werkbonnen</h2>
-            <div id="external-events">
-                {% for wb in unscheduled_workbonnen %}
-                    <div class="fc-event external-event" id="werkbon-{{ wb.pk }}" data-id="{{ wb.pk }}" draggable="true">
-                        {{ wb.werkbonnummer }}<br>
-                        {% if wb.klant %}
-                            {{ wb.klant.naam }}
-                        {% else %}
-                            Geen klant
-                        {% endif %}
-                    </div>
-                {% empty %}
-                    <p>Geen werkbonnen</p>
-                {% endfor %}
-            </div>
-        </div>
+<div class="fc-event external-event" data-id="123">Werkbon 123</div>
+  <!-- Sidebar: Resource selectie en externe events -->
+  <div id="sidebar">
+    <div id="sidebar-header">
+      <h3>Medewerker selectie</h3>
+      <select id="employee-select">
+        <option value="alle">Alle medewerkers</option>
+        {% for werknemer in werknemers %}
+          <option value="{{ werknemer.id }}">{{ werknemer.naam }}</option>
+        {% endfor %}
+      </select>
+      <button id="add-workorder">Nieuwe werkbon toevoegen</button>
     </div>
+    <div id="unscheduled-container">
+      <h2>Niet ingeplande werkbonnen</h2>
+      <div id="external-events">
+        {% for wb in unscheduled_workbonnen %}
+          <div class="fc-event external-event" id="werkbon-{{ wb.pk }}" data-id="{{ wb.pk }}" draggable="true">
+            {{ wb.werkbonnummer }}<br>
+            {% if wb.klant %}
+              {{ wb.klant.naam }}
+            {% else %}
+              Geen klant
+            {% endif %}
+          </div>
+        {% empty %}
+          <p>Geen werkbonnen</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
 
-    <div id="calendar-container">
-        <div id="calendar"></div>
-    </div>
+  <!-- Kalender container -->
+  <div id="calendar-container">
+    <div id="calendar"></div>
+  </div>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
-<!-- ✅ Laad de FullCalendar-bestanden -->
+<!-- Laad FullCalendar en Scheduler CSS/JS -->
 <link href="{% static 'fullcalendar_scheduler/resource-timegrid.min.css' %}" rel="stylesheet" />
 <script src="{% static 'fullcalendar/js/main.min.js' %}"></script>
 <script src="{% static 'fullcalendar/js/interaction.global.min.js' %}"></script>
 <script src="{% static 'fullcalendar_scheduler/resource-timegrid.min.js' %}"></script>
-
+<script src="{% static 'js/planboard.js' %}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Planboard geladen.");
 
+    // Handler voor de knop "Nieuwe werkbon toevoegen"
     var addWorkorderButton = document.getElementById('add-workorder');
     if (addWorkorderButton) {
         addWorkorderButton.addEventListener('click', function() {
@@ -84,10 +89,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    var employeeSelect = document.getElementById('employee-select');
-
-    const calendarEl = document.getElementById('calendar');
-    const calendar = new FullCalendar.Calendar(calendarEl, {
+    // Initialiseer de kalender
+    var calendarEl = document.getElementById('calendar');
+    if (!calendarEl) {
+        console.error("Kalender element niet gevonden.");
+        return;
+    }
+    var calendar = new FullCalendar.Calendar(calendarEl, {
         schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
         initialView: 'resourceTimeGridWeek',
         locale: 'nl',
@@ -99,23 +107,38 @@ document.addEventListener('DOMContentLoaded', function() {
             center: 'title',
             right: 'resourceTimeGridWeek,dayGridMonth,timeGridDay'
         },
-        resources: '/planning/api/resources/', // ✅ Medewerkers correct laden
+        resources: '/planning/api/resources/',
         events: '/planning/api/werkbonnen/',
-
         eventDrop: function(info) {
+            // Update de werkbon wanneer deze wordt verplaatst
+            var resources = info.event.getResources();
+            var resource = resources.length ? resources[0] : null;
+            if (!resource) {
+                console.warn("Geen resource gevonden, drop ongedaan maken.");
+                info.revert();
+                return;
+            }
             fetch(`/planning/api/werkbonnen/${info.event.id}/update/`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
-                body: JSON.stringify({ 
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
                     'start': info.event.start.toISOString(),
-                    'resourceId': info.event.getResources()[0].id 
+                    'resourceId': resource.id
                 })
             })
             .then(response => response.json())
             .then(data => {
                 console.log("Werkbon geüpdatet:", data);
-                calendar.refetchEvents();
-                updateResourceView(); // ✅ Roep update aan in planboard_resource.html
+                if (data.status !== 'success') {
+                    alert("Er is een fout opgetreden: " + data.message);
+                    info.revert();
+                } else {
+                    calendar.refetchEvents();
+                    updateResourceView();
+                }
             })
             .catch(() => {
                 alert('Fout bij het updaten van de werkbon.');
@@ -123,21 +146,30 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
-
     calendar.render();
 
-    employeeSelect.addEventListener('change', function() {
-        var selected = this.value;
-        var url = (selected === 'alle') ? '/planning/api/werkbonnen/' : `/planning/api/werkbonnen/?medewerker=${selected}`;
-        calendar.refetchEvents();
-    });
+    // Filteren op medewerker
+    var employeeSelect = document.getElementById('employee-select');
+    if (employeeSelect) {
+        employeeSelect.addEventListener('change', function() {
+            var selected = this.value;
+            var resourceUrl = (selected === 'alle') ? '/planning/api/resources/' : `/planning/api/resources/?medewerker=${selected}`;
+            fetch(resourceUrl)
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Bijgewerkte resources:", data);
+                    calendar.setOption('resources', data);
+                    calendar.refetchEvents();
+                });
+        });
+    }
 
     function updateResourceView() {
         fetch('/planning/api/update_resources/')
         .then(response => response.json())
         .then(data => {
-            console.log("Resources bijgewerkt:", data);
-            window.parent.postMessage({ action: 'refresh_resource_view' }, '*'); // ✅ Stuur update naar planboard_resource.html
+            console.log("Resources bijgewerkt via updateResourceView:", data);
+            window.parent.postMessage({ action: 'refresh_resource_view' }, '*');
         });
     }
 

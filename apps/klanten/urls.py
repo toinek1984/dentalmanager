@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 
 app_name = 'klanten'
@@ -19,4 +19,6 @@ urlpatterns = [
     path('klantenoverzicht/', views.klantenoverzicht, name='klantenoverzicht_page'),
     path('klantaanmaken/', views.klantaanmaken, name='klantaanmaken'),
     # Verwijder of hernoem 'klantdossier/' omdat deze conflicteert met de detailview (die een klantnummer verwacht)
+    path('dossier/<int:klantnummer>/', views.dossier_detail, name='dossier_detail'),
+
 ]

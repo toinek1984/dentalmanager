@@ -4,7 +4,25 @@ from apps.planning.models import Werkbon, Opdrachtgever
 from apps.klanten.models import Klant
 from apps.hr.werknemers.models import Werknemer  # Zorg dat dit correct wordt geïmporteerd
 from .forms import WerkbonForm
+from django.shortcuts import render, redirect, get_object_or_404
+from apps.planning.models import Werkbon
 
+def planboard(request):
+    # Jouw bestaande planboard-view (als voorbeeld)
+    return render(request, 'planning/planboard.html')
+
+def planboard_resource(request):
+    # Jouw bestaande resource-view
+    return render(request, 'planning/planboard_resource.html')
+
+def werkbonnen(request):
+    """
+    Deze view geeft een overzicht van alle werkbonnen.
+    Pas de template aan naar de gewenste weergave (bijv. 'planning/werkbon_overzicht.html').
+    """
+    werkbon_list = Werkbon.objects.all().order_by('-aanmaakdatum')
+    return render(request, 'planning/werkbon_overzicht.html', {'werkbonnen': werkbon_list})
+    
 def create_werkbon(request):
     if request.method == "POST":
         form = WerkbonForm(request.POST)

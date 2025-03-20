@@ -16,7 +16,7 @@
         <div id="klant_resultaten" style="display:none; border:1px solid #ccc; padding:5px;"></div>
         <button type="button" id="toggleNieuweKlant">+ Nieuwe Klant</button><br>
         
-        <!-- Nieuwe klant gegevens, standaard verborgen -->
+        <!-- Nieuwe klantgegevens, standaard verborgen -->
         <div id="nieuwe_klant_form" style="display:none; margin-top:10px;">
             <label for="nieuwe_klant_adres">Adres:</label>
             <input type="text" id="nieuwe_klant_adres" name="nieuwe_klant_adres"><br>
@@ -42,7 +42,7 @@
         <div id="opdrachtgever_resultaten" style="display:none; border:1px solid #ccc; padding:5px;"></div>
         <button type="button" id="toggleNieuweOpdrachtgever">+ Nieuwe Opdrachtgever</button><br>
         
-        <!-- Nieuwe opdrachtgever gegevens, standaard verborgen -->
+        <!-- Nieuwe opdrachtgevergegevens, standaard verborgen -->
         <div id="nieuwe_opdrachtgever_form" style="display:none; margin-top:10px;">
             <label for="nieuwe_opdrachtgever_adres">Adres:</label>
             <input type="text" id="nieuwe_opdrachtgever_adres" name="nieuwe_opdrachtgever_adres"><br>
@@ -70,8 +70,8 @@
             <option value="c2">C2</option>
         </select><br>
         
-        <label for="aanvang_werkzaamheden">Aanvang werkzaamheden:</label>
-        <input type="date" id="aanvang_werkzaamheden" name="aanvang_werkzaamheden"><br>
+        <!-- Aanvang werk blijft leeg zodat de werkbon ongepland is -->
+        <input type="hidden" id="aanvang_werkzaamheden" name="aanvang_werkzaamheden" value="">
         
         <label for="naaminpersen">Naaminpersen:</label>
         <input type="checkbox" id="naaminpersen" name="naaminpersen"><br>
@@ -79,23 +79,17 @@
         <label for="behandelaar">Behandelaar:</label>
         <select id="behandelaar" name="behandelaar">
             <option value="">Selecteer een behandelaar</option>
-            <option value="Jellie">Jellie</option>
-            <option value="Romy">Romy</option>
-            <option value="Sabrina">Sabrina</option>
-            <option value="Ellen">Ellen</option>
-            <option value="Usman">Usman</option>
+            {% for werknemer in werknemers %}
+                <option value="{{ werknemer.id }}">{{ werknemer.naam }}</option>
+            {% endfor %}
         </select><br>
         
         <label for="technicus">Technicus:</label>
         <select id="technicus" name="technicus">
             <option value="">Selecteer een technicus</option>
-            <option value="Job">Job</option>
-            <option value="Myrthe">Myrthe</option>
-            <option value="Jellie">Jellie</option>
-            <option value="Sabrina">Sabrina</option>
-            <option value="Romy">Romy</option>
-            <option value="Ellen">Ellen</option>
-            <option value="Usman">Usman</option>
+            {% for werknemer in werknemers %}
+                <option value="{{ werknemer.id }}">{{ werknemer.naam }}</option>
+            {% endfor %}
         </select><br>
         
         <label for="notities">Notities:</label>
@@ -156,27 +150,26 @@
 {% block extra_js %}
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // Toggle nieuwe klantformulier inline
+    // Toggle nieuw klantformulier
     var toggleNieuweKlantBtn = document.getElementById("toggleNieuweKlant");
     var nieuweKlantForm = document.getElementById("nieuwe_klant_form");
     toggleNieuweKlantBtn.addEventListener("click", function() {
         nieuweKlantForm.style.display = (nieuweKlantForm.style.display === "none" || nieuweKlantForm.style.display === "") ? "block" : "none";
     });
-    
-    // Toggle nieuwe opdrachtgeverformulier inline
+
+    // Toggle nieuw opdrachtgeverformulier
     var toggleNieuweOpdrachtgeverBtn = document.getElementById("toggleNieuweOpdrachtgever");
     var nieuweOpdrachtgeverForm = document.getElementById("nieuwe_opdrachtgever_form");
     toggleNieuweOpdrachtgeverBtn.addEventListener("click", function() {
         nieuweOpdrachtgeverForm.style.display = (nieuweOpdrachtgeverForm.style.display === "none" || nieuweOpdrachtgeverForm.style.display === "") ? "block" : "none";
     });
-    
+
     // Marketing-opties filteren op provincie
     var provincieSelect = document.getElementById("provincie");
     var marketingSelect = document.getElementById("marketing_optie");
     provincieSelect.addEventListener("change", function() {
         var gekozenProvincie = this.value;
         marketingSelect.innerHTML = '<option value="">Selecteer marketing optie</option>';
-        // Voorbeelddata voor marketingcampagnes – vervang dit door dynamische data als dat mogelijk is
         var marketingCampagnes = [
             {id: 1, naam: "Campagne A", provincie: "Groningen"},
             {id: 2, naam: "Campagne B", provincie: "Friesland"},
@@ -193,22 +186,20 @@ document.addEventListener("DOMContentLoaded", function() {
             marketingSelect.appendChild(option);
         });
     });
-    
+
     // Klant zoeken functie
     var klantZoekveld = document.getElementById("klant_zoekveld");
     var klantResultaten = document.getElementById("klant_resultaten");
-    
     klantZoekveld.addEventListener("input", function() {
         var zoekterm = this.value.trim();
         if (zoekterm.length < 2) {
             klantResultaten.style.display = "none";
             return;
         }
-    
         fetch(`/klanten/json/?q=${encodeURIComponent(zoekterm)}`)
             .then(response => response.json())
             .then(function(data) {
-                klantResultaten.innerHTML = ""; // Wis vorige resultaten
+                klantResultaten.innerHTML = "";
                 if (data.length === 0) {
                     klantResultaten.innerHTML = "<p>Geen klanten gevonden</p>";
                 } else {
@@ -231,7 +222,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 console.error("Fout bij ophalen klanten:", error);
             });
     });
-    
+
     // Verberg klantresultaten wanneer buiten het zoekveld wordt geklikt
     document.addEventListener("click", function(event) {
         if (!klantZoekveld.contains(event.target) && !klantResultaten.contains(event.target)) {

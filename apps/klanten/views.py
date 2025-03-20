@@ -8,6 +8,14 @@ from .models import KlantDossier
 from .forms import KlantDossierForm
 from django.utils import timezone
 from .forms import KlantNotitieForm 
+from django.http import JsonResponse
+from .models import Klant
+
+def search_klant(request):
+    """Zoekt klanten op basis van een zoekterm en geeft een JSON-lijst terug."""
+    zoekterm = request.GET.get('q', '').strip()
+    klanten = Klant.objects.filter(naam__icontains=zoekterm).values('id', 'naam', 'adres', 'woonplaats', 'telefoon', 'email')
+    return JsonResponse(list(klanten), safe=False)
 
 
 def klantenoverzicht(request):
