@@ -5,14 +5,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const csrfTokenElem = document.querySelector('[name=csrfmiddlewaretoken]');
     const csrfToken = csrfTokenElem ? csrfTokenElem.value : '';
 
-    // Maak externe events draggable met removeOnDrop
+    // Maak de externe events draggable met removeOnDrop
     const externalEventsContainer = document.getElementById('external-events');
     if (externalEventsContainer) {
         new FullCalendar.Draggable(externalEventsContainer, {
             itemSelector: '.fc-event.external-event',
             eventData: function(eventEl) {
                 const id = eventEl.getAttribute('data-id');
-                const title = eventEl.innerText.trim();
+                // Gebruik innerHTML zodat de volledige opmaak (bijv. blok) wordt meegenomen
+                const title = eventEl.innerHTML;
                 console.log("Draggable event data:", id, title);
                 return { id: id, title: title };
             },
@@ -43,6 +44,28 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         resources: '/planning/api/resources/',
         events: '/planning/api/werkbonnen/',
+        
+        // Deze callback wordt aangeroepen wanneer een extern event wordt ontvangen (bij drop)
+        eventReceive: function(info) {
+            console.log("External event received:", info.event.id);
+            // Probeer het originele element te verwijderen als dat nog bestaat
+            if (info.draggedEl) {
+                console.log("Removing external element via eventReceive using info.draggedEl.");
+                info.draggedEl.remove();
+            } else {
+                // Fallback: zoek het element op in de container via data-id
+                const extContainer = document.getElementById('external-events');
+                if (extContainer) {
+                    const child = extContainer.querySelector(`[data-id="${info.event.id}"]`);
+                    if (child) {
+                        console.log("Removing external element via fallback in eventReceive.");
+                        child.remove();
+                    }
+                }
+            }
+        },
+        
+        // Deze callback wordt aangeroepen wanneer een event (werkbon) wordt verplaatst
         eventDrop: function(info) {
             console.log("Event dropped:", info.event.id, "New start:", info.event.start.toISOString());
             const resources = info.event.getResources();
@@ -52,7 +75,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 info.revert();
                 return;
             }
-            // Verstuur update naar de server
             fetch(`/planning/api/werkbonnen/${info.event.id}/update/`, {
                 method: 'POST',
                 headers: {
@@ -78,9 +100,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     info.revert();
                 } else {
                     console.log("Event updated successfully.");
-                    // Probeer eerst de dragged element te verwijderen
+                    // Probeer eerst via info.draggedEl te verwijderen
                     if (info.draggedEl) {
-                        console.log("Removing dragged element using info.draggedEl.");
+                        console.log("Removing dragged element using info.draggedEl in eventDrop.");
                         info.draggedEl.remove();
                     } else {
                         // Fallback: zoek in de external-events container op data-id
@@ -88,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (extContainer) {
                             const child = extContainer.querySelector(`[data-id="${info.event.id}"]`);
                             if (child) {
-                                console.log("Removing dragged element using fallback lookup.");
+                                console.log("Removing dragged element using fallback lookup in eventDrop.");
                                 child.remove();
                             } else {
                                 console.warn("No external event element found with data-id:", info.event.id);
@@ -108,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     calendar.render();
 
-    // Globale opslag voor resources voor filtering
+    // Globale opslag voor alle resources voor filtering
     let allResources = [];
     fetch('/planning/api/resources/')
         .then(response => response.json())
@@ -117,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => console.error("Error fetching resources:", error));
 
-    // Filteren op medewerker
+    // Filteren op medewerker: schakel tussen collectieve en individuele weergave
     const employeeSelect = document.getElementById('employee-select');
     if (employeeSelect) {
         employeeSelect.addEventListener('change', function() {

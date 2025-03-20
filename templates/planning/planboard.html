@@ -24,6 +24,16 @@
     width: 100%;
     height: 100%;
   }
+  /* Styling voor de werkbon-kaarten in de unscheduled container */
+  .werkbon-kaart {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    cursor: move;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+  }
 </style>
 
 <div class="planboard-container">
@@ -43,12 +53,12 @@
       <h2>Niet ingeplande werkbonnen</h2>
       <div id="external-events">
         {% for wb in unscheduled_workbonnen %}
-          <div class="fc-event external-event" data-id="{{ wb.pk }}" draggable="true">
-            {{ wb.werkbonnummer }}<br>
+          <div class="fc-event external-event werkbon-kaart" data-id="{{ wb.pk }}" draggable="true">
+            <strong>{{ wb.werkbonnummer }}</strong><br>
             {% if wb.klant %}
-              {{ wb.klant.naam }}
+              <em>{{ wb.klant.naam }}</em>
             {% else %}
-              Geen klant
+              <span>Geen klant</span>
             {% endif %}
           </div>
         {% empty %}
