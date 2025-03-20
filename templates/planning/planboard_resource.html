@@ -3,28 +3,21 @@
 {% block title %}Planboard Resource View{% endblock %}
 
 {% block content %}
-<!-- Stijlen voor de planboard resource view -->
 <style>
   .planboard-container {
     display: flex;
     width: 100%;
     height: calc(100vh - 150px);
   }
-  /* Sidebar voor resource selectie */
+  /* Sidebar styling */
   #sidebar {
     flex: 0 0 15%;
-    display: flex;
-    flex-direction: column;
     padding: 10px;
     border-right: 1px solid #ccc;
-    box-sizing: border-box;
     overflow-y: auto;
   }
   #sidebar-header {
     margin-bottom: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
   }
   #employee-select {
     width: 100%;
@@ -34,7 +27,7 @@
   #add-workorder {
     width: 100%;
     padding: 8px;
-    font-size: 1em;
+    margin-top: 10px;
     background-color: #ccc;
     border: none;
     cursor: pointer;
@@ -55,7 +48,6 @@
   }
 </style>
 
-<!-- HTML-structuur -->
 <div class="planboard-container">
   <div id="sidebar">
     <div id="sidebar-header">
@@ -75,99 +67,9 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- Laad de benodigde FullCalendar en Scheduler scripts -->
-<link href="{% static 'fullcalendar_scheduler/resource-timegrid.min.css' %}" rel="stylesheet" />
+<link href="{% static 'fullcalendar_scheduler/resource-timegrid.min.css' %}" rel="stylesheet">
 <script src="{% static 'fullcalendar/js/main.min.js' %}"></script>
 <script src="{% static 'fullcalendar/js/interaction.global.min.js' %}"></script>
 <script src="{% static 'fullcalendar_scheduler/resource-timegrid.min.js' %}"></script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("Planboard Resource View initialisatie gestart.");
-
-    // Initialiseer de kalender
-    var calendarEl = document.getElementById('calendar');
-    if (!calendarEl) {
-        console.error("Element met id 'calendar' niet gevonden.");
-        return;
-    }
-    
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-        schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
-        initialView: 'resourceTimeGridWeek',
-        locale: 'nl',
-        editable: true,
-        eventResourceEditable: true,
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'resourceTimeGridWeek,dayGridMonth,timeGridDay'
-        },
-        resources: '/planning/api/resources/',
-        events: '/planning/api/werkbonnen/',
-        eventDrop: function(info) {
-            console.log("Werkbon verplaatst:", info.event.id, "Nieuwe datum:", info.event.start.toISOString());
-            var resource = info.event.getResources()[0];
-            if (!resource) {
-                console.warn("Geen resource gevonden, drop niet toegestaan.");
-                info.revert();
-                return;
-            }
-            fetch(`/planning/api/werkbonnen/${info.event.id}/update/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                },
-                body: JSON.stringify({
-                    'start': info.event.start.toISOString(),
-                    'resourceId': resource.id
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Response van server:", data);
-                if (data.status !== 'success') {
-                    alert("Er is een fout opgetreden: " + data.message);
-                    info.revert();
-                } else {
-                    console.log("Werkbon succesvol geüpdatet.");
-                    calendar.refetchEvents();
-                }
-            })
-            .catch(error => {
-                console.error("Netwerkfout:", error);
-                alert("Fout bij het plannen van de werkbon.");
-                info.revert();
-            });
-        }
-    });
-    
-    calendar.render();
-
-    // Filteren op medewerker
-    var employeeSelect = document.getElementById('employee-select');
-    if (employeeSelect) {
-        employeeSelect.addEventListener('change', function() {
-            var selected = this.value;
-            var resourceUrl = (selected === 'alle') ? '/planning/api/resources/' : `/planning/api/resources/?medewerker=${selected}`;
-            fetch(resourceUrl)
-                .then(response => response.json())
-                .then(data => {
-                    console.log("Bijgewerkte resources:", data);
-                    calendar.setOption('resources', data);
-                    calendar.refetchEvents();
-                });
-        });
-    }
-
-    // Nieuwe werkbon toevoegen knop
-    var addWorkorderButton = document.getElementById('add-workorder');
-    if (addWorkorderButton) {
-        addWorkorderButton.addEventListener('click', function() {
-            window.location.href = '/planning/aanmaken/';
-        });
-    }
-});
-</script>
+<script src="{% static 'js/planboard.js' %}"></script>
 {% endblock %}

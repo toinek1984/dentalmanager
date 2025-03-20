@@ -1,33 +1,32 @@
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("Planboard geladen.");
+    console.log("Planboard loaded.");
 
-    // Functie om de externe events draggable te maken
-    function initDraggableEvents() {
-        var externalEventsContainer = document.getElementById('external-events');
-        if (externalEventsContainer) {
-            // Maak een nieuwe Draggable-instantie; dit zorgt voor alle child-elementen
-            new FullCalendar.Draggable(externalEventsContainer, {
-                itemSelector: '.fc-event.external-event',
-                eventData: function(eventEl) {
-                    const id = eventEl.getAttribute('data-id');
-                    const title = eventEl.innerText.trim();
-                    console.log("Draggable event data:", id, title);
-                    return { id: id, title: title };
-                }
-            });
-            console.log("Draggable external events geactiveerd.");
-        } else {
-            console.error("Container met id 'external-events' niet gevonden.");
-        }
+    // Haal de CSRF-token op (indien aanwezig)
+    const csrfTokenElem = document.querySelector('[name=csrfmiddlewaretoken]');
+    const csrfToken = csrfTokenElem ? csrfTokenElem.value : '';
+
+    // Maak externe events draggable met removeOnDrop
+    const externalEventsContainer = document.getElementById('external-events');
+    if (externalEventsContainer) {
+        new FullCalendar.Draggable(externalEventsContainer, {
+            itemSelector: '.fc-event.external-event',
+            eventData: function(eventEl) {
+                const id = eventEl.getAttribute('data-id');
+                const title = eventEl.innerText.trim();
+                console.log("Draggable event data:", id, title);
+                return { id: id, title: title };
+            },
+            removeOnDrop: true
+        });
+        console.log("External events are now draggable with removeOnDrop enabled.");
+    } else {
+        console.error("External events container not found.");
     }
-
-    // Roep de functie aan bij pageload
-    initDraggableEvents();
 
     // Initialiseer de kalender
     const calendarEl = document.getElementById('calendar');
     if (!calendarEl) {
-        console.error("Element met id 'calendar' niet gevonden.");
+        console.error("Calendar element not found.");
         return;
     }
     const calendar = new FullCalendar.Calendar(calendarEl, {
@@ -45,23 +44,20 @@ document.addEventListener('DOMContentLoaded', function() {
         resources: '/planning/api/resources/',
         events: '/planning/api/werkbonnen/',
         eventDrop: function(info) {
-            console.log("Werkbon verplaatst:", info.event.id, "Nieuwe datum:", info.event.start.toISOString());
-            
-            // Haal het eerste resource-object op
+            console.log("Event dropped:", info.event.id, "New start:", info.event.start.toISOString());
             const resources = info.event.getResources();
             const resource = resources.length > 0 ? resources[0] : null;
             if (!resource) {
-                console.warn("Geen resource gevonden, drop niet toegestaan.");
+                console.warn("No resource found, reverting drop.");
                 info.revert();
                 return;
             }
-
-            // Update de werkbon via de API
+            // Verstuur update naar de server
             fetch(`/planning/api/werkbonnen/${info.event.id}/update/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    'X-CSRFToken': csrfToken
                 },
                 body: JSON.stringify({
                     'start': info.event.start.toISOString(),
@@ -70,49 +66,77 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(response => {
                 if (!response.ok) {
-                    return response.text().then(text => { throw new Error(text) });
+                    return response.text().then(text => { throw new Error(text); });
                 }
                 return response.json();
             })
             .then(data => {
-                console.log("Response van server:", data);
+                console.log("Server response:", data);
                 if (data.status !== 'success') {
-                    let errorMsg = data.message || "Onbekende fout";
-                    alert("Er is een fout opgetreden: " + errorMsg);
+                    let errorMsg = data.message || "Unknown error";
+                    alert("Error: " + errorMsg);
                     info.revert();
                 } else {
-                    console.log("Werkbon succesvol geüpdatet.");
-                    // Als de externe event-element in de container zit, verwijder deze
-                    if (info.draggedEl && info.draggedEl.parentNode) {
-                        info.draggedEl.parentNode.removeChild(info.draggedEl);
+                    console.log("Event updated successfully.");
+                    // Probeer eerst de dragged element te verwijderen
+                    if (info.draggedEl) {
+                        console.log("Removing dragged element using info.draggedEl.");
+                        info.draggedEl.remove();
+                    } else {
+                        // Fallback: zoek in de external-events container op data-id
+                        const extContainer = document.getElementById('external-events');
+                        if (extContainer) {
+                            const child = extContainer.querySelector(`[data-id="${info.event.id}"]`);
+                            if (child) {
+                                console.log("Removing dragged element using fallback lookup.");
+                                child.remove();
+                            } else {
+                                console.warn("No external event element found with data-id:", info.event.id);
+                            }
+                        }
                     }
                     calendar.refetchEvents();
                 }
             })
             .catch(error => {
-                console.error("Netwerkfout of serverfout:", error);
-                alert("Fout bij het plannen van de werkbon.");
+                console.error("Error updating event:", error);
+                alert("Error updating event.");
                 info.revert();
             });
         }
     });
-
+    
     calendar.render();
+
+    // Globale opslag voor resources voor filtering
+    let allResources = [];
+    fetch('/planning/api/resources/')
+        .then(response => response.json())
+        .then(data => {
+            allResources = data;
+        })
+        .catch(error => console.error("Error fetching resources:", error));
 
     // Filteren op medewerker
     const employeeSelect = document.getElementById('employee-select');
     if (employeeSelect) {
         employeeSelect.addEventListener('change', function() {
             const selected = this.value;
-            const resourceUrl = selected === 'alle' ? '/planning/api/resources/' : `/planning/api/resources/?medewerker=${selected}`;
-            fetch(resourceUrl)
-                .then(response => response.json())
-                .then(data => {
-                    console.log("Bijgewerkte resources:", data);
-                    calendar.setOption('resources', data);
-                    calendar.refetchEvents();
-                })
-                .catch(error => console.error("Fout bij ophalen van resources:", error));
+            if (selected === 'alle') {
+                calendar.setOption('resources', allResources);
+            } else {
+                const filtered = allResources.filter(resource => resource.id == selected);
+                calendar.setOption('resources', filtered);
+            }
+            calendar.refetchEvents();
+        });
+    }
+
+    // Handler voor de knop "Nieuwe werkbon toevoegen"
+    const addWorkorderButton = document.getElementById('add-workorder');
+    if (addWorkorderButton) {
+        addWorkorderButton.addEventListener('click', function() {
+            window.location.href = '/planning/aanmaken/';
         });
     }
 });

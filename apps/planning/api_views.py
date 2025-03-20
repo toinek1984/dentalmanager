@@ -9,12 +9,13 @@ from apps.hr.werknemers.models import Werknemer
 def werkbon_list(request):
     """
     Retourneert een JSON-lijst van werkbonnen.
-    Let op: als het veld 'behandelaar' een string bevat (bijvoorbeeld oude data), dan wordt er None teruggegeven.
+    Let op: als het veld 'behandelaar' een string bevat (bijvoorbeeld oude data),
+    dan wordt er None teruggegeven als resourceId.
     """
     werkbonnen = Werkbon.objects.all()
     data = []
     for wb in werkbonnen:
-        # Controleer of wb.behandelaar een object is met een id attribuut
+        # Controleer of wb.behandelaar een object is met een 'id'-attribuut
         if wb.behandelaar and hasattr(wb.behandelaar, 'id'):
             resource_id = wb.behandelaar.id
         else:
@@ -29,12 +30,11 @@ def werkbon_list(request):
         })
     return JsonResponse(data, safe=False)
 
-
 @csrf_exempt
 def update_werkbon(request, pk):
     """
-    Update de 'aanvang_werkzaamheden' van een werkbon op basis van de 'start' datum uit de POST-data.
-    Verwacht een JSON payload met onder andere de sleutel 'start'.
+    Update de 'aanvang_werkzaamheden' van een werkbon op basis van de 'start' datum 
+    uit de POST-data. Verwacht een JSON payload met onder andere de sleutel 'start'.
     """
     if request.method == "POST":
         wb = get_object_or_404(Werkbon, pk=pk)
@@ -42,7 +42,7 @@ def update_werkbon(request, pk):
             data = json.loads(request.body)
             new_date_str = data.get('start')
             if new_date_str:
-                # Gebruik alleen het datumgedeelte als er een "T" in zit
+                # Gebruik alleen het datumgedeelte (split op "T" indien aanwezig)
                 new_date_str = new_date_str.split("T")[0]
                 new_date = datetime.strptime(new_date_str, '%Y-%m-%d').date()
                 wb.aanvang_werkzaamheden = new_date
@@ -57,6 +57,7 @@ def update_werkbon(request, pk):
 def api_resources(request):
     """
     Retourneert een JSON-lijst met alle medewerkers (werknemers) voor FullCalendar.
+    Elk object bevat de 'id' en de 'title' (volledige naam).
     """
     werknemers = Werknemer.objects.all().values('id', 'naam')
     data = [{'id': w['id'], 'title': w['naam']} for w in werknemers]
