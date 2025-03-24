@@ -114,7 +114,7 @@ class Werkbon(models.Model):
     gebitsdatum = models.DateField("Gebitsdatum", null=True, blank=True)
     tandkleur = models.CharField("Tandkleur", max_length=10, choices=TANDKLEUR_CHOICES, blank=True)
     aanmaakdatum = models.DateField("Aanmaakdatum", auto_now_add=True)
-    aanvang_werkzaamheden = models.DateField("Aanvang werkzaamheden", null=True, blank=True)
+    aanvang_werkzaamheden = models.DateTimeField("Aanvang werkzaamheden", null=True, blank=True)
     naaminpersen = models.BooleanField("Naaminpersen?", default=False)
     behandelaar = models.CharField("Behandelaar", max_length=100, choices=BEHANDELAAR_CHOICES, blank=True)
     technicus = models.CharField("Technicus", max_length=100, choices=TECHNICI_CHOICES, blank=True)

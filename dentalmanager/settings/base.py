@@ -12,11 +12,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = 'jouw-geheime-sleutel'
 DEBUG = True
 ALLOWED_HOSTS = []
+
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
 INSTALLED_APPS = [
+    # Django's eigen apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -27,13 +29,17 @@ INSTALLED_APPS = [
     'django_otp.plugins.otp_static',
     'django_otp.plugins.otp_totp',
     'two_factor',  # of 'django_two_factor' afhankelijk van de package-versie
-    # Apps
+
+    # Eigen apps
     'apps.boekhouding',
     'apps.boekhouding.tarieven.apps.TarievenConfig',
-    'apps.boekhouding.marketing.apps.MarketingConfig', # Voeg dit toe
+    'apps.boekhouding.marketing.apps.MarketingConfig',
     'apps.wagenpark',
     'apps.klanten',
-    'apps.hr',
+    'apps.hr',  # Als er specifieke code in de hr-app zit
+    # Voor de werknemers-app geef je de AppConfig expliciet op zodat de label consistent wordt.
+    'apps.hr.werknemers.apps.WerknemersConfig',
+    'apps.planning.apps.PlanningConfig',
     'apps.hr.werknemers',
     'apps.planning',
     'apps.magazijn',
@@ -95,9 +101,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = 'nl-NL'
-
 TIME_ZONE = 'Europe/Amsterdam'
-
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
@@ -105,4 +109,3 @@ USE_TZ = True
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "media"
-

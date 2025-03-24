@@ -1,23 +1,21 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Planboard loaded.");
 
-    // Haal de CSRF-token op (indien aanwezig)
+    // CSRF-token ophalen
     const csrfTokenElem = document.querySelector('[name=csrfmiddlewaretoken]');
     const csrfToken = csrfTokenElem ? csrfTokenElem.value : '';
 
-    // Globale opslag voor resources (voor filtering)
     let allResources = [];
 
-    // Maak externe events draggable met removeOnDrop
+    // Externe events draggable maken
     const externalEventsContainer = document.getElementById('external-events');
     if (externalEventsContainer) {
         new FullCalendar.Draggable(externalEventsContainer, {
             itemSelector: '.fc-event.external-event',
             eventData: function(eventEl) {
                 const id = eventEl.getAttribute('data-id');
-                // Gebruik innerHTML zodat de volledige opmaak (bijv. een "kaart") wordt meegenomen
                 const title = eventEl.innerHTML;
-                const duration = '01:00'; // standaardduur van 1 uur
+                const duration = '01:00'; // standaardduur 1 uur
                 console.log("Draggable event data:", id, title, "Duration:", duration);
                 return { id: id, title: title, duration: duration };
             },
@@ -28,12 +26,13 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error("External events container not found.");
     }
 
-    // Initialiseer de kalender
+    // Kalender initialiseren
     const calendarEl = document.getElementById('calendar');
     if (!calendarEl) {
         console.error("Calendar element not found.");
         return;
     }
+
     const calendar = new FullCalendar.Calendar(calendarEl, {
         schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
         initialView: 'resourceTimeGridWeek',
@@ -46,50 +45,43 @@ document.addEventListener('DOMContentLoaded', function() {
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
-            right: 'resourceTimeGridWeek,dayGridMonth,timeGridDay'
+            right: 'resourceTimeGridWeek,dayGridMonth,resourceTimeGridDay'
         },
+        // Zichtbare uren instellen: 08:00 tot 18:00 met 30 minuten slots
+        slotMinTime: '08:00:00',
+        slotMaxTime: '18:00:00',
+        slotDuration: '00:30:00',
         resources: '/planning/api/resources/',
         events: '/planning/api/werkbonnen/',
-        // Wanneer een extern event wordt overgenomen (bij drop)
+        
         eventReceive: function(info) {
             console.log("External event received:", info.event.id);
             if (info.draggedEl) {
-                console.log("Removing external element via eventReceive using info.draggedEl.");
                 info.draggedEl.remove();
             } else {
                 const extContainer = document.getElementById('external-events');
                 if (extContainer) {
                     const child = extContainer.querySelector(`[data-id="${info.event.id}"]`);
-                    if (child) {
-                        console.log("Removing external element via fallback in eventReceive.");
-                        child.remove();
-                    }
+                    if (child) { child.remove(); }
                 }
             }
         },
+        
         eventDrop: function(info) {
             console.log("Event dropped:", info.event.id, "New start:", info.event.start.toISOString());
             const eventId = info.event.id;
-            // Controleer of eventId een numerieke waarde is (reguliere werkbon) of niet (extra activiteit)
             if (isNaN(Number(eventId))) {
-                // Als het geen numeriek id is, is dit een extra activiteit die nog niet op de server staat
-                console.log("Extra activiteit gedropt; lokaal bijgewerkt. Geen server-update.");
-                // Verwijder het externe element indien aanwezig:
-                if (info.draggedEl) {
-                    info.draggedEl.remove();
-                }
-                // Update de kalender lokaal
+                console.log("Tijdelijk event gedropt; lokaal bijgewerkt, geen server-update.");
                 calendar.refetchEvents();
                 return;
             }
             const resources = info.event.getResources();
             const resource = resources.length > 0 ? resources[0] : null;
             if (!resource) {
-                console.warn("No resource found, reverting drop.");
+                console.warn("Geen resource gevonden, drop wordt teruggedraaid.");
                 info.revert();
                 return;
             }
-            // Verstuur update naar de server voor reguliere werkbonnen
             fetch(`/planning/api/werkbonnen/${eventId}/update/`, {
                 method: 'POST',
                 headers: {
@@ -98,44 +90,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify({
                     'start': info.event.start.toISOString(),
-                    'resourceId': resource.id
+                    'resource': resource.title  // resource.title bevat de naam, bv. "Jellie"
                 })
             })
             .then(response => {
+                console.log("Response status (update):", response.status);
                 if (!response.ok) {
                     return response.text().then(text => { throw new Error(text); });
                 }
                 return response.json();
             })
             .then(data => {
-                console.log("Server response:", data);
+                console.log("Server response (update):", data);
                 if (data.status !== 'success') {
-                    let errorMsg = data.message || "Unknown error";
+                    let errorMsg = data.message || "Onbekende fout";
                     alert("Error: " + errorMsg);
                     info.revert();
                 } else {
-                    console.log("Event updated successfully.");
-                    if (info.draggedEl) {
-                        console.log("Removing dragged element using info.draggedEl in eventDrop.");
-                        info.draggedEl.remove();
-                    } else {
-                        const extContainer = document.getElementById('external-events');
-                        if (extContainer) {
-                            const child = extContainer.querySelector(`[data-id="${eventId}"]`);
-                            if (child) {
-                                console.log("Removing dragged element using fallback lookup in eventDrop.");
-                                child.remove();
-                            } else {
-                                console.warn("No external event element found with data-id:", eventId);
-                            }
-                        }
-                    }
+                    console.log("Event succesvol geüpdatet.");
                     calendar.refetchEvents();
                 }
             })
             .catch(error => {
-                console.error("Error updating event:", error);
-                alert("Error updating event.");
+                console.error("Fout bij updaten event:", error);
+                alert("Fout bij updaten event. Wijzigingen niet opgeslagen.");
                 info.revert();
             });
         }
@@ -143,15 +121,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     calendar.render();
 
-    // Haal resources op voor filtering en sla ze op in allResources
+    // Resources ophalen voor filtering
     fetch('/planning/api/resources/')
         .then(response => response.json())
         .then(data => {
+            console.log("Fetched resources:", data);
             allResources = data;
         })
         .catch(error => console.error("Error fetching resources:", error));
 
-    // Filteren op medewerker: schakel tussen collectieve en individuele weergave
+    // Filteren op medewerker
     const employeeSelect = document.getElementById('employee-select');
     if (employeeSelect) {
         employeeSelect.addEventListener('change', function() {
@@ -166,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Handler voor de knop "Nieuwe werkbon toevoegen"
+    // Handler voor "Nieuwe werkbon toevoegen"
     const addWorkorderButton = document.getElementById('add-workorder');
     if (addWorkorderButton) {
         addWorkorderButton.addEventListener('click', function() {
@@ -174,11 +153,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Handler voor de knop "Nieuwe Activiteit" met standaard keuzes
+    // Handler voor "Nieuwe Activiteit" met server-opslag
     const newActivityBtn = document.getElementById('new-activity-btn');
     if (newActivityBtn) {
         newActivityBtn.addEventListener('click', function() {
-            // Vooraf gedefinieerde activiteitstypes
             const activityTypes = [
                 { id: 'route', title: 'Route rijden' },
                 { id: 'snipper', title: 'Snippermiddag' },
@@ -195,21 +173,47 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             const selectedActivity = activityTypes[index];
-            // Gebruik de huidige datum en tijd als startmoment
-            const now = new Date();
-            const start = now.toISOString();
-            // Wijs standaard de eerste resource toe (voor een extra activiteit kun je dit eventueel later aanpassen)
-            let defaultResourceId = allResources.length > 0 ? allResources[0].id : null;
-            // Maak een nieuw event met een tijdelijk (niet-numeriek) id zodat we weten dat het een extra activiteit is
-            const newEvent = {
-                id: 'temp-' + Date.now().toString(),  // id begint met 'temp-' zodat eventDrop weet dat dit geen server-event is
-                title: selectedActivity.title,
-                start: start,
-                duration: '01:00', // standaardduur van 1 uur
-                resourceId: defaultResourceId
-            };
-            calendar.addEvent(newEvent);
-            alert("Activiteit toegevoegd! Je kunt deze verplaatsen of resizen.");
+            
+            // Stel de starttijd vast op 08:00 lokale tijd
+            let newStart = new Date();
+            newStart.setHours(9, 0, 0, 0);
+            const start = newStart.toISOString();
+
+            let defaultResource = (allResources.length > 0) ? allResources[0] : null;
+            if (!defaultResource) {
+                alert("Geen medewerker (behandelaar) beschikbaar. Voeg eerst een medewerker toe.");
+                return;
+            }
+            let defaultResourceName = defaultResource.title;
+
+            // Verstuur de nieuwe activiteit naar de server
+            fetch('/planning/api/werkbonnen/create/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    title: selectedActivity.title,
+                    start: start,
+                    resource: defaultResourceName
+                })
+            })
+            .then(response => {
+                console.log("Response status (create):", response.status);
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Werkbon aangemaakt:", data);
+                calendar.refetchEvents();
+            })
+            .catch(error => {
+                console.error("Fout bij het aanmaken van werkbon:", error);
+                alert("Fout bij het aanmaken van de werkbon.");
+            });
         });
     }
 });
