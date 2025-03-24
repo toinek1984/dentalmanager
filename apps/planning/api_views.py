@@ -8,7 +8,7 @@ from apps.planning.models import Werkbon
 def werkbon_list(request):
     """
     Retourneert een JSON-lijst van werkbonnen.
-    Het veld 'resourceId' bevat de opgeslagen behandelaar-naam.
+    Het veld 'resourceId' bevat de opgeslagen behandelaar-naam en we voegen 'barcode' toe.
     """
     werkbonnen = Werkbon.objects.all()
     data = []
@@ -20,9 +20,11 @@ def werkbon_list(request):
             'title': wb.werkbonnummer,
             'start': start_str,
             'resourceId': resource_val,
+            'barcode': wb.barcode,    # Voeg barcode toe
             'status': wb.status,
         })
     return JsonResponse(data, safe=False)
+
 
 @csrf_exempt
 def update_werkbon(request, pk):

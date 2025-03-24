@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
             eventData: function(eventEl) {
                 const id = eventEl.getAttribute('data-id');
                 const title = eventEl.innerHTML;
-                const duration = '01:00'; // standaardduur 1 uur
+                const duration = '01:00';
                 console.log("Draggable event data:", id, title, "Duration:", duration);
                 return { id: id, title: title, duration: duration };
             },
@@ -47,13 +47,19 @@ document.addEventListener('DOMContentLoaded', function() {
             center: 'title',
             right: 'resourceTimeGridWeek,dayGridMonth,resourceTimeGridDay'
         },
-        // Zichtbare uren instellen: 08:00 tot 18:00 met 30 minuten slots
         slotMinTime: '08:00:00',
         slotMaxTime: '18:00:00',
         slotDuration: '00:30:00',
         resources: '/planning/api/resources/',
         events: '/planning/api/werkbonnen/',
-        
+        // Gebruik eventContent om aangepaste inhoud te tonen (inclusief barcode indien beschikbaar)
+        eventContent: function(arg) {
+            let html = `<div class="fc-event-title">${arg.event.title}</div>`;
+            if (arg.event.extendedProps.barcode) {
+                html += `<div class="fc-event-barcode">Barcode: ${arg.event.extendedProps.barcode}</div>`;
+            }
+            return { html: html };
+        },
         eventReceive: function(info) {
             console.log("External event received:", info.event.id);
             if (info.draggedEl) {
@@ -66,7 +72,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         },
-        
         eventDrop: function(info) {
             console.log("Event dropped:", info.event.id, "New start:", info.event.start.toISOString());
             const eventId = info.event.id;
@@ -90,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify({
                     'start': info.event.start.toISOString(),
-                    'resource': resource.title  // resource.title bevat de naam, bv. "Jellie"
+                    'resource': resource.title
                 })
             })
             .then(response => {
@@ -116,12 +121,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert("Fout bij updaten event. Wijzigingen niet opgeslagen.");
                 info.revert();
             });
+        },
+        eventClick: function(info) {
+            // Doorsturen naar de detailpagina (waar je de volledige werkbon, inclusief barcode, ziet)
+            window.location.href = `/planning/werkbon_overzicht/${info.event.id}/`;
         }
     });
     
     calendar.render();
 
-    // Resources ophalen voor filtering
+    // Resources ophalen
     fetch('/planning/api/resources/')
         .then(response => response.json())
         .then(data => {
@@ -174,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             const selectedActivity = activityTypes[index];
             
-            // Stel de starttijd vast op 08:00 lokale tijd
+            // Forceer de starttijd op 09:00 lokale tijd ("9000")
             let newStart = new Date();
             newStart.setHours(9, 0, 0, 0);
             const start = newStart.toISOString();

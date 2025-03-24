@@ -22,6 +22,10 @@ def werkbonnen(request):
     """
     werkbon_list = Werkbon.objects.all().order_by('-aanmaakdatum')
     return render(request, 'planning/werkbon_overzicht.html', {'werkbonnen': werkbon_list})
+
+def print_werkbon(request, pk):
+    werkbon = get_object_or_404(Werkbon, pk=pk)
+    return render(request, 'planning/print.html', {'werkbon': werkbon})
     
 def create_werkbon(request):
     if request.method == "POST":
@@ -98,3 +102,4 @@ def index(request):
     """
     from django.http import HttpResponse
     return HttpResponse('Welkom bij de planning app!')
+

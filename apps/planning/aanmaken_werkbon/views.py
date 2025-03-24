@@ -1,7 +1,9 @@
+import random
+from datetime import datetime
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.http import HttpResponseBadRequest, JsonResponse
-from apps.planning.models import Werkbon, Klant, Opdrachtgever
+from apps.planning.models import Werkbon, Klant, Opdrachtgever, generate_werkbonnummer
 from apps.boekhouding.tarieven.models import NZACode
 from apps.hr.werknemers.models import Werknemer
 
@@ -22,7 +24,6 @@ def search_opdrachtgever(request):
 def create_klantdossier_for_klant(klant):
     """
     Helperfunctie: Maak een klantdossier aan voor de gegeven klant.
-    Voeg hier jouw logica toe (bijvoorbeeld een record in het KlantDossier-model).
     """
     print(f"Klantdossier wordt aangemaakt voor: {klant.naam}")
     # Voorbeeld: KlantDossier.objects.create(klant=klant, ...)
@@ -66,13 +67,12 @@ def create_werkbon(request):
                 )
 
         # ----- Werkbon Specifieke Gegevens -----
-        # Omdat de werkbon in de container blijft (ongepland) geven we geen startdatum door.
         gebitsdatum = request.POST.get('gebitsdatum') or None
         tandkleur = request.POST.get('tandkleur', '')
-        aanvang_werkzaamheden = None
+        aanvang_werkzaamheden = None  # Wordt later ingesteld door de planning
         naaminpersen = (request.POST.get('naaminpersen') == 'on')
 
-        # Haal de werknemer-ID’s op en controleer of ze numeriek zijn
+        # Haal werknemer-ID’s op
         behandelaar_id = request.POST.get('behandelaar', '').strip()
         technicus_id = request.POST.get('technicus', '').strip()
         if not behandelaar_id.isdigit():
@@ -88,6 +88,9 @@ def create_werkbon(request):
         except Werknemer.DoesNotExist:
             return HttpResponseBadRequest("Technicus niet gevonden.")
 
+        if not behandelaar.naam:
+            return HttpResponseBadRequest("De geselecteerde behandelaar heeft geen naam.")
+
         notities = request.POST.get('notities', '')
         facturabel_garantie = request.POST.get('facturabel_garantie', '')
 
@@ -100,6 +103,10 @@ def create_werkbon(request):
             except NZACode.DoesNotExist:
                 nza_instance = None
 
+        # ----- Genereer een uniek werkbonnummer -----
+        base_werkbonnummer = generate_werkbonnummer()  # Bijvoorbeeld: "A787F98C"
+        werkbonnummer = f"{base_werkbonnummer}_{random.randint(1000, 9999)}"
+
         # ----- Maak de Werkbon aan -----
         werkbon = Werkbon.objects.create(
             klant=klant,
@@ -108,21 +115,23 @@ def create_werkbon(request):
             tandkleur=tandkleur,
             aanvang_werkzaamheden=aanvang_werkzaamheden,
             naaminpersen=naaminpersen,
-            behandelaar=behandelaar,
-            technicus=technicus,
+            behandelaar=behandelaar.naam,
+            technicus=technicus.naam,
             notities=notities,
             nza_code=nza_instance,
             facturabel_garantie=facturabel_garantie,
+            werkbonnummer=werkbonnummer
         )
 
-        # Indien aangevinkt: maak ook een klantdossier aan
-        if request.POST.get('create_klantdossier') == 'on':
-            create_klantdossier_for_klant(klant)
+        print("Werkbon aangemaakt met barcode:", werkbon.barcode)
 
-        # Redirect naar het planboard zodat de werkbon in de container verschijnt
-        return redirect(reverse('planning:planboard'))
+        # Als "Opslaan en Print" is gekozen, redirect naar de printpagina
+        if request.POST.get('action') == 'print':
+            return redirect(reverse('planning:werkbon_print', args=[werkbon.pk]))
+        else:
+            return redirect(reverse('planning:planboard'))
 
-    # Voor GET-verzoeken: haal alle benodigde data op en toon het formulier
+    # Voor GET: render het formulier
     nza_codes = NZACode.objects.all()
     werknemers = Werknemer.objects.all()
     context = {

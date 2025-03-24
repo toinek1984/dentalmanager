@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.urls import path, include
 from apps.home.views import home  # Zorg dat deze view bestaat
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -18,4 +20,7 @@ urlpatterns = [
     path('beheerders/', include('apps.beheerderspagina.urls')),
     path('login/', include('apps.log_in_pagina.urls')),
     path('klantdossier/', include(('apps.klanten.klantdossier.urls', 'klantdossier'), namespace='klantdossier')),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

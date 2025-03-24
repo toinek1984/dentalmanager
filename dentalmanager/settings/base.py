@@ -36,12 +36,9 @@ INSTALLED_APPS = [
     'apps.boekhouding.marketing.apps.MarketingConfig',
     'apps.wagenpark',
     'apps.klanten',
-    'apps.hr',  # Als er specifieke code in de hr-app zit
-    # Voor de werknemers-app geef je de AppConfig expliciet op zodat de label consistent wordt.
-    'apps.hr.werknemers.apps.WerknemersConfig',
-    'apps.planning.apps.PlanningConfig',
-    'apps.hr.werknemers',
-    'apps.planning',
+    'apps.hr',  # als er algemene HR-code is
+    'apps.hr.werknemers.apps.WerknemersConfig',  # expliciete AppConfig voor werknemers
+    'apps.planning.apps.PlanningConfig',          # expliciete AppConfig voor planning
     'apps.magazijn',
     'apps.beheerderspagina',
     'apps.log_in_pagina',

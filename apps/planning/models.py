@@ -1,6 +1,8 @@
 import uuid
+import os
 from datetime import date, timedelta
 from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import User
 from apps.boekhouding.marketing.models import MarketingCampagne
 from apps.boekhouding.tarieven.models import NZACode
@@ -8,7 +10,7 @@ from apps.boekhouding.tarieven.models import NZACode
 # Hulpfuncties
 def generate_werkbonnummer():
     """
-    Genereer een uniek werkbonnummer (bv. de eerste 8 karakters van een UUID).
+    Genereer een uniek werkbonnummer (bijv. de eerste 8 karakters van een UUID).
     """
     return str(uuid.uuid4())[:8].upper()
 
@@ -18,8 +20,29 @@ def generate_barcode():
     """
     return "BC" + str(uuid.uuid4())[:10].upper()
 
+def generate_barcode_image(code_value):
+    import os
+    import barcode
+    from barcode.writer import ImageWriter
+    Code128 = barcode.get_barcode_class('code128')
+    # Writer-opties aangepast voor A6-papier: kleinere modules en geen tekst
+    writer_options = {
+        'module_width': 0.15,   # nog kleiner dan 0.2
+        'module_height': 10.0,  # lager voor een kortere barcode
+        'quiet_zone': 1,        # minimaliseer de witruimte
+        'write_text': False,    # geen tekst onder de barcode
+    }
+    barcode_instance = Code128(code_value, writer=ImageWriter())
+    filename = f"barcode_{code_value}"
+    folder = os.path.join(settings.MEDIA_ROOT, 'barcodes')
+    os.makedirs(folder, exist_ok=True)
+    filepath = os.path.join(folder, filename)
+    saved_path = barcode_instance.save(filepath, options=writer_options)
+    rel_path = os.path.relpath(saved_path, settings.MEDIA_ROOT)
+    return rel_path
+
 # --------------------------
-# Model voor Klantgegevens
+# Model voor Klantgegevens (voor zover nodig in planning)
 # --------------------------
 class Klant(models.Model):
     naam = models.CharField("Naam", max_length=100)
@@ -29,22 +52,7 @@ class Klant(models.Model):
     telefoon = models.CharField("Telefoonnummer", max_length=20, blank=True)
     email = models.EmailField("Email", blank=True)
     verzekeringsnummer = models.CharField("Verzekeringsnummer", max_length=50, blank=True)
-    mantelzorger = models.BooleanField("Heeft mantelzorger?", default=False)
-    mantelzorger_naam = models.CharField("Mantelzorger Naam", max_length=100, blank=True)
-    mantelzorger_telefoon = models.CharField("Mantelzorger Telefoon", max_length=20, blank=True)
-    mantelzorger_geboortedatum = models.DateField("Mantelzorger Geboortedatum", null=True, blank=True)
-    onder_bewind = models.BooleanField("Onder bewind?", default=False)
-    HERKOMST_CHOICES = [
-        ('google', 'Google'),
-        ('facebook', 'Facebook'),
-        ('krant', 'Krant'),
-        ('radio', 'Radio'),
-        ('viavia', 'Viavia'),
-        ('folder', 'Folder'),
-        ('sponsoring', 'Sponsoring'),
-        ('anders', 'Anders'),
-    ]
-    herkomst = models.CharField("Hoe is de klant bij ons gekomen?", max_length=20, choices=HERKOMST_CHOICES, blank=True)
+    # Overige velden...
 
     def __str__(self):
         return self.naam
@@ -105,6 +113,7 @@ FACTURABEL_GARANTIE_CHOICES = [
 class Werkbon(models.Model):
     werkbonnummer = models.CharField("Werkbonnummer", max_length=20, unique=True, blank=True)
     barcode = models.CharField("Barcode", max_length=100, unique=True, blank=True)
+    barcode_image = models.ImageField(upload_to='barcodes/', blank=True, null=True)
     
     # Koppelingen
     klant = models.ForeignKey(Klant, on_delete=models.SET_NULL, null=True, blank=True, related_name='werkbonnen')
@@ -147,8 +156,10 @@ class Werkbon(models.Model):
             self.werkbonnummer = generate_werkbonnummer()
         if not self.barcode:
             self.barcode = generate_barcode()
+        if not self.barcode_image:
+            self.barcode_image = generate_barcode_image(self.barcode)
         super().save(*args, **kwargs)
-    
+
     def __str__(self):
         return f"Werkbon {self.werkbonnummer}"
 
