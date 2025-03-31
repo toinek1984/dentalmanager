@@ -1,6 +1,7 @@
+# apps/klanten/forms.py
 from django import forms
-from .models import KlantDossier
-from .models import KlantNotitie
+from apps.klanten.klantdossier.models import KlantDossier, KlantNotitie
+
 
 class KlantDossierForm(forms.ModelForm):
     class Meta:
@@ -18,4 +19,4 @@ class KlantNotitieForm(forms.ModelForm):
         fields = ['tekst']
         widgets = {
             'tekst': forms.Textarea(attrs={'rows': 4, 'cols': 40, 'placeholder': 'Voer hier je notitie in...'}),
-        }        
+        }

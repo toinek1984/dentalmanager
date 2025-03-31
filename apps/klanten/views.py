@@ -4,12 +4,13 @@ from .models import Klant
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
-from .models import KlantDossier
+from apps.klanten.klantdossier.models import KlantDossier
 from .forms import KlantDossierForm
 from django.utils import timezone
 from .forms import KlantNotitieForm 
 from django.http import JsonResponse
 from .models import Klant
+
 
 def search_klant(request):
     """Zoekt klanten op basis van een zoekterm en geeft een JSON-lijst terug."""

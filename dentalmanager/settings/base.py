@@ -25,21 +25,23 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Derde-partij apps
     'django_otp',
     'django_otp.plugins.otp_static',
     'django_otp.plugins.otp_totp',
     'two_factor',  # of 'django_two_factor' afhankelijk van de package-versie
 
-    # Eigen apps
+    # Eigen apps (project-specifiek)
     'apps.boekhouding',
-    'apps.boekhouding.tarieven.apps.TarievenConfig',
-    'apps.boekhouding.marketing.apps.MarketingConfig',
+    'apps.boekhouding.tarieven.apps.TarievenConfig',  # Specifieke configuratie voor tarieven
+    'apps.boekhouding.marketing.apps.MarketingConfig',  # Configuratie voor de marketingmodule
     'apps.wagenpark',
-    'apps.klanten',
-    'apps.klanten.klantdossier.apps.KlantdossierConfig',  # Zorg voor een aparte AppConfig voor klantdossier # ...
-    'apps.hr',  # als er algemene HR-code is
-    'apps.hr.werknemers.apps.WerknemersConfig',  # expliciete AppConfig voor werknemers
-    'apps.planning.apps.PlanningConfig',          # expliciete AppConfig voor planning
+    'apps.klanten',  # Hoofdapp voor klanten
+    'apps.klanten.klantdossier.apps.KlantdossierConfig',  # Zorg voor een aparte AppConfig voor KlantDossier
+    'apps.hr',  # Algemene HR-code (als er een aparte logica is)
+    'apps.hr.werknemers.apps.WerknemersConfig',  # Expliciete AppConfig voor werknemers
+    'apps.planning.apps.PlanningConfig',          # Expliciete AppConfig voor planning
     'apps.magazijn',
     'apps.beheerderspagina',
     'apps.log_in_pagina',
