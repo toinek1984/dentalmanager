@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Werkbon Bewerken{% endblock %}
+
+{% block content %}
+<h1>Bewerk Werkbon: {{ werkbon.werkbonnummer }}</h1>
+<form method="post" action="">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Opslaan</button>
+</form>
+{% endblock %}

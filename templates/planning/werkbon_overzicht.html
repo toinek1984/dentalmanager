@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Werkbon Overzicht{% endblock %}
+
+{% block extra_head %}
+  <style>
+    table.overview {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: Arial, sans-serif;
+    }
+    table.overview th, table.overview td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    table.overview th {
+      background-color: #f2f2f2;
+    }
+    table.overview tr:nth-child(even) {
+      background-color: #fafafa;
+    }
+    table.overview tr:hover {
+      background-color: #e0e0e0;
+      cursor: pointer;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<h1>Werkbon Overzicht</h1>
+<table class="overview">
+  <thead>
+    <tr>
+      <th>Werkbonnummer</th>
+      <th>Klantnaam</th>
+      <th>Datum ingepland</th>
+      <th>Status</th>
+      <th>Actie</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for wb in werkbonnen %}
+    <tr onclick="window.location.href='{% url 'planning:werkbon_print' wb.pk %}'">
+      <td>{{ wb.werkbonnummer }}</td>
+      <td>
+        {% if wb.klant %}
+          <!-- Gebruik de aangepaste URL-omkering: let op de namespace en viewnaam -->
+          <a href="{% url 'klantdossier:dossier_detail' wb.klant.id %}" onclick="event.stopPropagation();">
+            {{ wb.klant.naam }}
+          </a>
+        {% else %}
+          Niet gekoppeld
+        {% endif %}
+      </td>
+      <td>
+        {% if wb.aanvang_werkzaamheden %}
+          {{ wb.aanvang_werkzaamheden|date:"Y-m-d H:i" }}
+        {% else %}
+          Niet ingepland
+        {% endif %}
+      </td>
+      <td>{{ wb.status }}</td>
+      <td>
+        <a href="{% url 'aanmaken_werkbon:edit_werkbon' wb.pk %}" onclick="event.stopPropagation();">Bewerk</a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="5">Geen werkbonnen gevonden.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

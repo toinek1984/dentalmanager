@@ -20,6 +20,7 @@ class Klant(models.Model):
     def __str__(self):
         return self.naam
 
+
 class Opdrachtgever(models.Model):
     naam = models.CharField("Naam", max_length=100)
     adres = models.CharField("Adres", max_length=200, blank=True)
@@ -31,18 +32,9 @@ class Opdrachtgever(models.Model):
 
     def __str__(self):
         return self.naam
-        
-from django.db import models
 
-class KlantDossier(models.Model):
-    klant = models.OneToOneField('Klant', on_delete=models.CASCADE, related_name='dossier')
-    aangemaakt_op = models.DateTimeField(auto_now_add=True)
-    # Voeg hier extra velden toe indien nodig, bijvoorbeeld opmerkingen of status
 
-    def __str__(self):
-        return f"Dossier van {self.klant.naam}"
-        
-
+# Houd alleen deze uitgebreide definitie van KlantDossier; verwijder de kortere versie!
 class KlantDossier(models.Model):
     klantnummer = models.AutoField(primary_key=True)
     voornaam = models.CharField(max_length=100)
@@ -54,26 +46,39 @@ class KlantDossier(models.Model):
     woonplaats = models.CharField(max_length=100)
     telefoonnummer = models.CharField(max_length=20)
     emailadres = models.EmailField()
-    zorginstelling = models.CharField(max_length=200, blank=True, null=True, help_text="Indien van toepassing")
-    onder_bewind = models.BooleanField(default=False, help_text="Is de klant onder bewind?")
+    zorginstelling = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text="Indien van toepassing"
+    )
+    onder_bewind = models.BooleanField(
+        default=False,
+        help_text="Is de klant onder bewind?"
+    )
     bewindvoerder_naam = models.CharField(max_length=100, blank=True, null=True)
     bewindvoerder_adres = models.CharField(max_length=200, blank=True, null=True)
     bewindvoerder_telefoon = models.CharField(max_length=20, blank=True, null=True)
     bewindvoerder_email = models.EmailField(blank=True, null=True)
     verzekeringsnummer = models.CharField(max_length=100)
-    # We verwijderen het oude notitiefeld als we meerdere notities willen hebben.
-    # notities = models.TextField(blank=True, null=True)
     factuur_geschiedenis = models.JSONField(blank=True, null=True)
     werkbon_geschiedenis = models.JSONField(blank=True, null=True)
     extra_fields = models.JSONField(blank=True, null=True)
-    is_overleden = models.BooleanField(default=False, help_text="Markeer dossier als afgesloten bij overlijden")
-    overlijdensdatum = models.DateField(blank=True, null=True, help_text="Datum van overlijden, indien van toepassing")
-    
+    is_overleden = models.BooleanField(
+        default=False,
+        help_text="Markeer dossier als afgesloten bij overlijden"
+    )
+    overlijdensdatum = models.DateField(
+        blank=True,
+        null=True,
+        help_text="Datum van overlijden, indien van toepassing"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
         return f"{self.voornaam} {self.achternaam} ({self.klantnummer})"
+
 
 class KlantNotitie(models.Model):
     dossier = models.ForeignKey(KlantDossier, on_delete=models.CASCADE, related_name='notities')

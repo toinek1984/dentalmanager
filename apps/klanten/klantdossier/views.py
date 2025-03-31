@@ -1,7 +1,8 @@
 from django.shortcuts import render, get_object_or_404
-from apps.klanten.models import Klant  # Of importeer het relevante model
+from .models import KlantDossier
 
 def dossier_detail(request, klant_id):
-    # Haal de klant of dossier op op basis van het ID
-    klant = get_object_or_404(Klant, id=klant_id)
-    return render(request, 'klanten/klantdossier/detail.html', {'klant': klant})
+    # Zoek het dossier voor de Klant met het gegeven id
+    dossier = get_object_or_404(KlantDossier, klant__id=klant_id)
+    return render(request, 'klantdossier/dossier_detail.html', {'dossier': dossier})
+
