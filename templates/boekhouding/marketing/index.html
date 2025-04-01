@@ -3,8 +3,27 @@
 {% block title %}Marketing Campagnes{% endblock %}
 {% block content %}
 <h1>Marketing Campagnes</h1>
-<a href="{% url 'marketing_add' %}" style="display:inline-block; margin-bottom:10px;">Nieuwe campagne toevoegen</a>
-<a href="{% url 'marketing_history' %}" style="display:inline-block; margin-bottom:10px;">Bekijk Geschiedenis</a>
+
+<style>
+  .btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #666;  /* grijs */
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 4px;
+  text-decoration: none;  /* verwijdert de standaard onderstreping */
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-right: 10px;
+}
+
+.btn:hover {
+  background-color: #777;
+}
+</style>
+<a href="{% url 'marketing_add' %}"  class="btn">Nieuwe campagne toevoegen</a>
+<a href="{% url 'marketing_history' %}" class="btn">Bekijk Geschiedenis</a>
 
 <ul>
     {% for campagne in campagnes %}
