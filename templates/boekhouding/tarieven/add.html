@@ -1,18 +1,89 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block title %}Nieuwe NZA Code{% endblock %}
+
 {% block content %}
 <h1>Nieuwe NZA Code Toevoegen</h1>
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
+
     <h2>Werkfases</h2>
-    {{ formset.management_form }}
-    {% for form in formset %}
-        <div style="border:1px solid #ccc; padding: 10px; margin-bottom: 10px;">
-            {{ form.as_p }}
-        </div>
-    {% endfor %}
+    <div id="werkfase-forms">
+        <!-- Toon de management form voor de inline formset -->
+        {{ formset.management_form }}
+        <!-- Toon elk werkfaseformulier -->
+        {% for form in formset %}
+            <div class="werkfase-form" style="border:1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+                {{ form.as_p }}
+                <!-- Voeg een extra slider toe voor de duur -->
+                <label for="{{ form.prefix }}-duur">Kies duur (in seconden):</label>
+                <!-- Hier verwachten we dat het formulier een veld "duur" bevat dat we met een slider tonen -->
+                <input type="range" name="{{ form.prefix }}-duur" id="id_{{ form.prefix }}-duur" class="duur-slider" min="900" max="14400" step="900" value="900" oninput="updateDurationDisplay(this)">
+                <span class="duur-display" id="display_{{ form.prefix }}-duur">0:15 uur</span>
+            </div>
+        {% endfor %}
+    </div>
+    <!-- Knop om een extra werkfaseformulier toe te voegen -->
+    <button type="button" id="add-werkfase">Voeg werkfase toe</button>
+    <br><br>
     <button type="submit">Opslaan</button>
 </form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Functie om de slider-waarde (in seconden) om te zetten naar uren:minuten
+function updateDurationDisplay(inputElem) {
+    var totalSeconds = parseInt(inputElem.value);
+    var hours = Math.floor(totalSeconds / 3600);
+    var minutes = Math.floor((totalSeconds % 3600) / 60);
+    // Zorg dat minuten altijd twee cijfers tonen
+    var minutesStr = minutes < 10 ? '0' + minutes : minutes;
+    // Zoek de display span op basis van het veldnaam-id
+    var displayElem = document.getElementById("display_" + inputElem.name);
+    if (displayElem) {
+        displayElem.innerText = hours + ":" + minutesStr + " uur";
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    // Voeg eventlisteners toe aan bestaande slider inputs
+    document.querySelectorAll("input.duur-slider").forEach(function(inputElem) {
+        updateDurationDisplay(inputElem);
+        inputElem.addEventListener("input", function() {
+            updateDurationDisplay(inputElem);
+        });
+    });
+
+    // Knop om dynamisch een nieuw werkfaseformulier toe te voegen
+    var addButton = document.getElementById("add-werkfase");
+    addButton.addEventListener("click", function() {
+        // Haal de TOTAL_FORMS van de management form op
+        var totalFormsElem = document.getElementById("id_{{ formset.prefix }}-TOTAL_FORMS");
+        var currentCount = parseInt(totalFormsElem.value);
+        // Haal de lege formulier-template op (escapejs maakt de HTML veilig)
+        var emptyFormHtml = `{{ formset.empty_form.as_p|escapejs }}`;
+        // Vervang alle __prefix__ placeholders door het huidige aantal
+        var newFormHtml = emptyFormHtml.replace(/__prefix__/g, currentCount);
+        // Voeg de slider en display toe voor de duur
+        newFormHtml += `
+            <label for="{{ formset.prefix }}-` + currentCount + `-duur">Kies duur (in seconden):</label>
+            <input type="range" name="{{ formset.prefix }}-` + currentCount + `-duur" id="id_{{ formset.prefix }}-` + currentCount + `-duur" class="duur-slider" min="900" max="14400" step="900" value="900" oninput="updateDurationDisplay(this)">
+            <span class="duur-display" id="display_{{ formset.prefix }}-` + currentCount + `-duur">0:15 uur</span>
+        `;
+        // Maak een nieuw div-element en voeg de nieuwe form HTML toe
+        var newDiv = document.createElement("div");
+        newDiv.classList.add("werkfase-form");
+        newDiv.style.border = "1px solid #ccc";
+        newDiv.style.padding = "10px";
+        newDiv.style.marginBottom = "10px";
+        newDiv.innerHTML = newFormHtml;
+        // Voeg het nieuwe formulier toe aan de container
+        document.getElementById("werkfase-forms").appendChild(newDiv);
+        // Verhoog het totaal aantal formulieren
+        totalFormsElem.value = currentCount + 1;
+    });
+});
+</script>
 {% endblock %}

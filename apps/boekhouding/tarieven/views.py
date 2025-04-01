@@ -2,33 +2,16 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.forms import inlineformset_factory
 from .models import NZACode, Werkfase
 from .forms import NZACodeForm, WerkfaseForm
-# apps/boekhouding/tarieven/views.py
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import NZACode
-from .forms import NZACodeForm
-
-def tarieven_index(request):
-    nzacodes = NZACode.objects.all()
-    return render(request, 'boekhouding/tarieven/index.html', {'nzacodes': nzacodes})
-
-def tarieven_edit(request, pk):
-    nzacode = get_object_or_404(NZACode, pk=pk)
-    if request.method == 'POST':
-        form = NZACodeForm(request.POST, instance=nzacode)
-        if form.is_valid():
-            form.save()
-            return redirect('tarieven_index')
-    else:
-        form = NZACodeForm(instance=nzacode)
-    return render(request, 'boekhouding/tarieven/edit.html', {'form': form})
-
+from datetime import timedelta
 
 def nza_index(request):
     codes = NZACode.objects.all()
     return render(request, 'boekhouding/tarieven/index.html', {'codes': codes})
 
 def nza_add(request):
-    WerkfaseFormSet = inlineformset_factory(NZACode, Werkfase, form=WerkfaseForm, extra=5, can_delete=False)
+    # Laat de gebruiker het aantal extra werkfase-formulieren kiezen via een GET-parameter 'extra'
+    extra_forms = int(request.GET.get('extra', 1))
+    WerkfaseFormSet = inlineformset_factory(NZACode, Werkfase, form=WerkfaseForm, extra=extra_forms, can_delete=False)
     if request.method == 'POST':
         form = NZACodeForm(request.POST)
         formset = WerkfaseFormSet(request.POST)
@@ -36,9 +19,9 @@ def nza_add(request):
             nza = form.save()
             formset.instance = nza
             formset.save()
-            # Verwijder werkfase-objecten die geen tijdsduur hebben ingevuld
+            # Optioneel: verwijder werkfase-objecten met een nulduur
             for wf in nza.werkfases.all():
-                if not wf.duur:
+                if wf.duur == timedelta(0):
                     wf.delete()
             return redirect('nza_index')
     else:
@@ -55,13 +38,11 @@ def nza_edit(request, pk):
         if form.is_valid() and formset.is_valid():
             form.save()
             formset.save()
-            # Verwijder werkfase-objecten zonder ingevulde tijdsduur
             for wf in nza.werkfases.all():
-                if not wf.duur:
+                if wf.duur == timedelta(0):
                     wf.delete()
             return redirect('nza_index')
     else:
         form = NZACodeForm(instance=nza)
         formset = WerkfaseFormSet(instance=nza)
     return render(request, 'boekhouding/tarieven/edit.html', {'form': form, 'formset': formset, 'nza': nza})
-
