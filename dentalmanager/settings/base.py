@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'apps.boekhouding.marketing.apps.MarketingConfig',  # Configuratie voor de marketingmodule
     'apps.wagenpark',
     'apps.klanten',  # Hoofdapp voor klanten
-    'apps.klanten.klantdossier.apps.KlantdossierConfig',  # Zorg voor een aparte AppConfig voor KlantDossier
+    'apps.klanten.klantdossier.apps.KlantdossierConfig',  # Zorg dat deze AppConfig goed is ingesteld
     'apps.hr',  # Algemene HR-code (als er een aparte logica is)
     'apps.hr.werknemers.apps.WerknemersConfig',  # Expliciete AppConfig voor werknemers
     'apps.planning.apps.PlanningConfig',          # Expliciete AppConfig voor planning

@@ -15,6 +15,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'apps.hr.werknemers',
-    'apps.klanten.klantdossier.apps.KlantdossierConfig',  # Zorg voor een aparte AppConfig voor klantdossier
+    'apps.klanten.klantdossier.apps.KlantdossierConfig',  # Zorg dat deze AppConfig goed is ingesteld
     
 ]

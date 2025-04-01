@@ -1,6 +1,6 @@
-# apps/klanten/klantendossier/models.py
+# apps/klanten/klantdossier/models.py
 from django.db import models
-from apps.klanten.models import Klant
+from apps.klanten.models import Klant  # Zorg dat je hier verwijst naar het Klant-model uit de hoofd-app
 
 class KlantDossier(models.Model):
     klant = models.OneToOneField(Klant, on_delete=models.CASCADE, related_name='dossier')

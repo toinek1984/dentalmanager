@@ -1,6 +1,6 @@
 from django import forms
-from .models import KlantDossier
-from .models import KlantNotitie
+from apps.klanten.klantdossier.models import KlantDossier, KlantNotitie
+
 
 class KlantDossierForm(forms.ModelForm):
     class Meta:

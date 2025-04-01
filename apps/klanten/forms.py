@@ -1,7 +1,5 @@
-# apps/klanten/forms.py
 from django import forms
 from apps.klanten.klantdossier.models import KlantDossier, KlantNotitie
-
 
 class KlantDossierForm(forms.ModelForm):
     class Meta:
