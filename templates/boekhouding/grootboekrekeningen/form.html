@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{% if rekening %}Wijzig Grootboekrekening{% else %}Nieuwe Grootboekrekening aanmaken{% endif %}{% endblock %}
+
+{% block content %}
+  <h1>{% if rekening %}Wijzig Grootboekrekening{% else %}Nieuwe Grootboekrekening aanmaken{% endif %}</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn">Opslaan</button>
+  </form>
+  <p>
+    <a href="{% url 'grootboekrekeningen:dashboard' %}">Annuleren</a>
+  </p>
+{% endblock %}

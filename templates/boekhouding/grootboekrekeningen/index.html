@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Grootboekrekeningen Index{% endblock %}
+
+{% block content %}
+  <h1>Welkom bij de Grootboekrekeningen Module</h1>
+  <p>
+    <a href="{% url 'grootboekrekeningen:dashboard' %}">Ga naar het Dashboard</a>
+  </p>
+{% endblock %}

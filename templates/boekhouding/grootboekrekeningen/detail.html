@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Grootboekrekening Detail{% endblock %}
+
+{% block content %}
+  <h1>Detail van Grootboekrekening</h1>
+  <p><strong>Rekeningcode:</strong> {{ rekening.code }}</p>
+  <p><strong>Naam:</strong> {{ rekening.naam }}</p>
+  <p><strong>Omschrijving:</strong> {{ rekening.omschrijving }}</p>
+  <p>
+    <a href="{% url 'grootboekrekeningen:dashboard' %}">Terug naar Dashboard</a> |
+    <a href="{% url 'grootboekrekeningen:form' rekening.pk %}">Wijzigen</a>
+  </p>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Grootboekrekeningen Dashboard{% endblock %}
+
+{% block content %}
+  <h1>Grootboekrekeningen Dashboard</h1>
+
+  <p>
+    <a href="{% url 'grootboekrekeningen:form' %}" class="btn">Nieuwe Grootboekrekening aanmaken</a>
+  </p>
+
+  {% if rekeningen %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Naam</th>
+          <th>Omschrijving</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rekeningen %}
+        <tr>
+          <td>{{ r.code }}</td>
+          <td>{{ r.naam }}</td>
+          <td>{{ r.omschrijving }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>Er zijn nog geen grootboekrekeningen aangemaakt.</p>
+  {% endif %}
+{% endblock %}

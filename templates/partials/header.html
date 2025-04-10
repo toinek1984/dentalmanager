@@ -2,37 +2,36 @@
 <header>
   <nav>
     <ul class="main-menu">
-      <li>
-        <button onclick="location.href='/'" class="btn">Home</button>
-      </li>
+      <li><button onclick="location.href='/'" class="btn">Home</button></li>
+
       <li class="dropdown">
         <button class="btn dropdown-btn">Boekhouding</button>
         <ul class="submenu">
-          <li><a href="/boekhouding/submodules/crediteuren/">Crediteuren</a></li>
-          <li><a href="/boekhouding/submodules/debiteuren/">Debiteuren</a></li>
-          <li><a href="/boekhouding/submodules/facturatie/">Facturatie</a></li>
-          <li><a href="/boekhouding/submodules/grootboekrekeningen/">Grootboekrekeningen</a></li>
-          <li><a href="/boekhouding/kunstgebitaanhuis/">Kunstgebitaanhuis</a></li>
-          <li><a href="/boekhouding/submodules/laboratorium/">Laboratorium</a></li>
+          <li><a href="/boekhouding/crediteuren/">Crediteuren</a></li>
+          <li><a href="/boekhouding/debiteuren/">Debiteuren</a></li>
+          <li><a href="/boekhouding/facturatie/">Facturatie</a></li>
+          <li><a href="/boekhouding/grootboekrekeningen/dashboard/">Grootboekrekeningen</a></li>
+          <li><a href="/boekhouding/kunstgebitaanhuis/">Kunstgebit aan Huis</a></li>
+          <li><a href="/boekhouding/laboratorium/">Laboratorium</a></li>
           <li><a href="/boekhouding/marketing/">Marketing</a></li>
           <li><a href="/boekhouding/tarieven/">Tarieven</a></li>
-          <li><a href="/boekhouding/submodules/totaal_overzicht/">Totaal Overzicht</a></li>
+          <li><a href="/boekhouding/totaal_overzicht/">Totaal Overzicht</a></li>
         </ul>
       </li>
-      <li>
-        <button onclick="location.href='/wagenpark/'" class="btn">Wagenpark</button>
-      </li>
+
+      <li><button onclick="location.href='/wagenpark/'" class="btn">Wagenpark</button></li>
+
       <li class="dropdown">
         <button class="btn dropdown-btn">Klanten</button>
         <ul class="submenu">
           <li><a href="/klanten/dossiers/">Klantendossier</a></li>
           <li><a href="/klanten/klantenoverzicht/">Klantenoverzicht</a></li>
-          <li><a href="/klanten/klantaanmaken/">Klantaanmaken</a></li>
+          <li><a href="/klanten/klantaanmaken/">Klant Aanmaken</a></li>
         </ul>
       </li>
-      <li>
-        <button onclick="location.href='/hr/'" class="btn">HR</button>
-      </li>
+
+      <li><button onclick="location.href='/hr/'" class="btn">HR</button></li>
+
       <li class="dropdown">
         <button class="btn dropdown-btn">Planning</button>
         <ul class="submenu">
@@ -44,41 +43,29 @@
           <li><a href="/planning/planboard/">Planboard</a></li>
         </ul>
       </li>
-      <li>
-        <button onclick="location.href='/magazijn/'" class="btn">Magazijn</button>
-      </li>
-      <li>
-        <button onclick="location.href='/beheerderspagina/'" class="btn">Beheerders</button>
-      </li>
-      <li>
-        <button onclick="location.href='/registration/login/'" class="btn">Login</button>
-      </li>
+
+      <li><button onclick="location.href='/magazijn/'" class="btn">Magazijn</button></li>
+      <li><button onclick="location.href='/beheerderspagina/'" class="btn">Beheerders</button></li>
+      <li><button onclick="location.href='/registration/login/'" class="btn">Login</button></li>
     </ul>
   </nav>
 </header>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Zoek alle dropdown-knoppen en voeg een click-event toe voor het tonen/verbergen van de submenu's
-    var dropdownBtns = document.querySelectorAll('.dropdown-btn');
-    dropdownBtns.forEach(function(btn) {
-      btn.addEventListener('click', function(e) {
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.dropdown-btn').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
         e.stopPropagation();
         var submenu = this.nextElementSibling;
-        // Als het submenu al zichtbaar is, verberg het; anders, verberg eerst alle submenu's en toon dit submenu
-        if (submenu.style.display === 'block') {
-          submenu.style.display = 'none';
-        } else {
-          document.querySelectorAll('.submenu').forEach(function(menu) {
-            menu.style.display = 'none';
-          });
-          submenu.style.display = 'block';
-        }
+        document.querySelectorAll('.submenu').forEach(function (menu) {
+          if (menu !== submenu) menu.style.display = 'none';
+        });
+        submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
       });
     });
-    // Sluit alle submenu's wanneer ergens anders op de pagina wordt geklikt
-    document.addEventListener('click', function() {
-      document.querySelectorAll('.submenu').forEach(function(menu) {
+
+    document.addEventListener('click', function () {
+      document.querySelectorAll('.submenu').forEach(function (menu) {
         menu.style.display = 'none';
       });
     });

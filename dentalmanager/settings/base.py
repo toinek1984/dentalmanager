@@ -1,24 +1,29 @@
 import os
 from pathlib import Path
 
-LOGIN_REDIRECT_URL = '/'
-LOGIN_URL = '/accounts/login/'
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# BASE_DIR aanpassen zodat deze wijst naar de projectroot (waar manage.py staat)
+# BASE_DIR wijst naar de projectroot (waar manage.py staat)
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-SECRET_KEY = 'jouw-geheime-sleutel'
+# Veiligheids- en redirect-instellingen
+SECRET_KEY = 'jouw-geheime-sleutel'  # Vervang dit door een echte, veilige sleutel voor productie
 DEBUG = True
 ALLOWED_HOSTS = []
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/accounts/login/'
 
+# Static- en media-instellingen
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / "media"
+
+# Default auto field (voor Django 3.2+)
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Installed apps: Django eigen apps, derde-partij apps en eigen apps
 INSTALLED_APPS = [
-    # Django's eigen apps
+    # Django eigen apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -30,23 +35,30 @@ INSTALLED_APPS = [
     'django_otp',
     'django_otp.plugins.otp_static',
     'django_otp.plugins.otp_totp',
-    'two_factor',  # of 'django_two_factor' afhankelijk van de package-versie
+    'two_factor',  # Of 'django_two_factor', afhankelijk van de package-versie
 
     # Eigen apps (project-specifiek)
-    'apps.boekhouding',
-    'apps.boekhouding.tarieven.apps.TarievenConfig',  # Specifieke configuratie voor tarieven
-    'apps.boekhouding.marketing.apps.MarketingConfig',  # Configuratie voor de marketingmodule
+    # Indien je een algemene boekhouding-app niet gebruikt (en enkel de submodules via de AppConfigs),
+    # kun je de algemene 'apps.boekhouding' eventueel weglaten.
+    'apps.boekhouding.tarieven.apps.TarievenConfig',
+    'apps.boekhouding.marketing.apps.MarketingConfig',
+    'apps.boekhouding.grootboekrekeningen.apps.GrootboekrekeningenConfig',
+    'apps.boekhouding.laboratorium',
+    'apps.boekhouding.kunstgebitaanhuis',
+    'apps.boekhouding.totaal_overzicht',
+
     'apps.wagenpark',
-    'apps.klanten',  # Hoofdapp voor klanten
-    'apps.klanten.klantdossier.apps.KlantdossierConfig',  # Zorg dat deze AppConfig goed is ingesteld
-    'apps.hr',  # Algemene HR-code (als er een aparte logica is)
-    'apps.hr.werknemers.apps.WerknemersConfig',  # Expliciete AppConfig voor werknemers
-    'apps.planning.apps.PlanningConfig',          # Expliciete AppConfig voor planning
+    'apps.klanten',
+    'apps.klanten.klantdossier.apps.KlantdossierConfig',
+    'apps.hr',
+    'apps.hr.werknemers.apps.WerknemersConfig',
+    'apps.planning.apps.PlanningConfig',
     'apps.magazijn',
     'apps.beheerderspagina',
     'apps.log_in_pagina',
 ]
 
+# Middleware configuratie
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -57,13 +69,14 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# Root URL-conf
 ROOT_URLCONF = 'dentalmanager.urls'
 
+# Templates configuratie
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        # Hiermee zoekt Django naar templates in de map "templates" op projectniveau
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # Hier zoekt Django naar je projecttemplates
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -76,8 +89,10 @@ TEMPLATES = [
     },
 ]
 
+# WSGI applicatie
 WSGI_APPLICATION = 'dentalmanager.wsgi.application'
 
+# Database configuratie (gebruik SQLite voor ontwikkeling)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -85,6 +100,7 @@ DATABASES = {
     }
 }
 
+# Authentiekeer- en wachtwoordvalidatie
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -100,12 +116,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Internationale instellingen
 LANGUAGE_CODE = 'nl-NL'
 TIME_ZONE = 'Europe/Amsterdam'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
-
-STATIC_URL = '/static/'
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / "media"
