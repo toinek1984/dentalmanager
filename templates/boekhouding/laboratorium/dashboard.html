@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Laboratorium Dashboard{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/boekhouding_laboratorium.css' %}">
+
+<h1>Laboratorium Overzicht (Afgeronde Werkbonnen)</h1>
+
+<!-- Form: user select month/quarter/year for p1 & p2 + technicus -->
+<form method="get">
+  <!-- Periode 1 -->
+  <h3>Periode 1</h3>
+  <select name="p1_type">
+    <option value="maand">Maand</option>
+    <option value="kwartaal">Kwartaal</option>
+    <option value="jaar">Jaar</option>
+  </select>
+  <input type="number" name="p1_jaar" value="2025" style="width:60px;">
+  <input type="number" name="p1_maand" value="4" style="width:40px;"> 
+  <!-- Of ander UI, net hoe je parse_period aanpast. -->
+  
+  <!-- Periode 2 -->
+  <h3>Periode 2</h3>
+  <select name="p2_type">
+    <option value="maand">Maand</option>
+    <option value="kwartaal">Kwartaal</option>
+    <option value="jaar">Jaar</option>
+  </select>
+  <input type="number" name="p2_jaar" value="2025" style="width:60px;">
+  <input type="number" name="p2_maand" value="3" style="width:40px;"> 
+
+  <!-- Technicus -->
+  <label for="technicus_id">Technicus:</label>
+  <select name="technicus_id" id="technicus_id">
+    <option value="all">Alle</option>
+    <!-- Je zou hier in the context dynamisch je technici kunnen aanbieden -->
+  </select>
+
+  <button type="submit">Toon</button>
+</form>
+
+<!-- Kolommenbalans: p1 vs p2 -->
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th>Lab Omzet</th>
+      <th>Garantie</th>
+      <th>Inkoop</th>
+      <th>Honorarium</th>
+      <th>Uren</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Periode 1</td>
+      <td>{{ p1.lab_omzet|floatformat:2 }}</td>
+      <td>{{ p1.garantie|floatformat:2 }}</td>
+      <td>{{ p1.inkoop|floatformat:2 }}</td>
+      <td>{{ p1.honorarium|floatformat:2 }}</td>
+      <td>{{ p1.uren|floatformat:2 }}</td>
+    </tr>
+    <tr>
+      <td>Periode 2</td>
+      <td>{{ p2.lab_omzet|floatformat:2 }}</td>
+      <td>{{ p2.garantie|floatformat:2 }}</td>
+      <td>{{ p2.inkoop|floatformat:2 }}</td>
+      <td>{{ p2.honorarium|floatformat:2 }}</td>
+      <td>{{ p2.uren|floatformat:2 }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Meerdere grafieken - 4 stuks: lab_omzet, garantie, inkoop, honorarium -->
+<div class="grafieken">
+  <div class="grafiek-item">
+    <h3>Lab Omzet</h3>
+    <canvas id="labOmzetChart" width="400" height="300"></canvas>
+  </div>
+  <div class="grafiek-item">
+    <h3>Garantie</h3>
+    <canvas id="garantieChart" width="400" height="300"></canvas>
+  </div>
+  <div class="grafiek-item">
+    <h3>Inkoop</h3>
+    <canvas id="inkoopChart" width="400" height="300"></canvas>
+  </div>
+  <div class="grafiek-item">
+    <h3>Honorarium</h3>
+    <canvas id="honorariumChart" width="400" height="300"></canvas>
+  </div>
+</div>
+
+<!-- Export buttons -->
+<div>
+  <button onclick="window.print()">Print</button>
+  <button onclick="exportExcel()">Excel</button>
+  <button onclick="exportPDF()">PDF</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+function exportExcel() {
+  alert("Excel export logic hier...");
+}
+function exportPDF() {
+  alert("PDF export logic hier...");
+}
+
+const graphData = JSON.parse('{{ graph_data|safe }}');
+// graphData = {lab_omzet:[p1,p2], garantie:[p1,p2], inkoop:[p1,p2], honorarium:[p1,p2]}
+
+function makeChart(canvasId, labelTitle, dataArr, color) {
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Periode 1','Periode 2'],
+      datasets: [{
+        label: labelTitle,
+        data: dataArr,
+        backgroundColor: [color, color],
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: { y: { beginAtZero:true } },
+      plugins: {
+        legend: {display:false},
+        title:{display:true,text:labelTitle}
+      }
+    }
+  });
+}
+
+// 4 charts:
+makeChart('labOmzetChart',  'Lab Omzet', graphData.lab_omzet, 'rgba(75,192,192,0.7)');
+makeChart('garantieChart',  'Garantie',  graphData.garantie,  'rgba(255,99,132,0.7)');
+makeChart('inkoopChart',    'Inkoop',    graphData.inkoop,    'rgba(54,162,235,0.7)');
+makeChart('honorariumChart','Honorarium',graphData.honorarium,'rgba(255,206,86,0.7)');
+</script>
+
+{% endblock %}

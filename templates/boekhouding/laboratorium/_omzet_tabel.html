@@ -1,0 +1,19 @@
+
+<table class="display table">
+  <thead>
+    <tr>
+      <th>Technicus</th>
+      <th>Type</th>
+      <th>Omzet</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for entry in entries %}
+    <tr>
+      <td>{{ entry.technicus }}</td>
+      <td>{{ entry.facturabel_garantie }}</td>
+      <td style="text-align:right;">€ {{ entry.omzet|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
