@@ -1,6 +1,6 @@
 from django.db import models
+from apps.boekhouding.grootboekrekeningen.models import Grootboekrekening  # ⬅ import toegevoegd
 
-# Kiesopties voor de marketingstrategie (indien gewenst)
 STRATEGIE_CHOICES = [
     ('google', 'Google'),
     ('facebook', 'Facebook'),
@@ -38,8 +38,16 @@ class MarketingCampagne(models.Model):
         choices=STRATEGIE_CHOICES,
         blank=True
     )
-    # Archivering: als de campagne handmatig is gearchiveerd
     archived = models.BooleanField(default=False)
+
+    # ➕ NIEUW: koppeling naar grootboekrekening
+    grootboekrekening = models.ForeignKey(
+        Grootboekrekening,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Grootboekrekening"
+    )
 
     def __str__(self):
         provincie_str = f" ({self.provincie})" if self.provincie else ""

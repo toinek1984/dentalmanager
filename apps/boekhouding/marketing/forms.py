@@ -7,7 +7,7 @@ class MarketingCampagneForm(forms.ModelForm):
         fields = [
             'naam', 'startdatum', 'einddatum', 'budget',
             'uitgegeven_bedrag', 'omschrijving', 'provincie',
-            'strategie', 'actief', 'archived'
+            'strategie', 'grootboekrekening', 'actief', 'archived'
         ]
         widgets = {
             'startdatum': forms.DateInput(attrs={'type': 'date'}),
