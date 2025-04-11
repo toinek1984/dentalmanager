@@ -5,15 +5,14 @@ from .models import NZACode, Werkfase
 class NZACodeForm(forms.ModelForm):
     class Meta:
         model = NZACode
-        fields = ['code', 'techniekkosten', 'honorarium', 'beschrijving']
+        fields = ['code', 'techniekkosten', 'honorarium', 'beschrijving', 'grootboekrekening']
         widgets = {
             'beschrijving': forms.Textarea(attrs={'rows': 3}),
         }
 
 class WerkfaseForm(forms.ModelForm):
-    # Voeg twee extra velden toe voor uren en minuten
     uren = forms.ChoiceField(
-        choices=[(i, i) for i in range(0, 5)],  # 0 tot 4 uur
+        choices=[(i, i) for i in range(0, 5)],
         label="Uren"
     )
     minuten = forms.ChoiceField(
@@ -21,10 +20,9 @@ class WerkfaseForm(forms.ModelForm):
         label="Minuten"
     )
     naam = forms.CharField(max_length=100, label="Fase Naam", required=False)
-    
+
     class Meta:
         model = Werkfase
-        # We verwerken de duur via de extra velden, dus we nemen 'volgorde' en 'naam'
         fields = ['volgorde', 'naam']
 
     def clean(self):

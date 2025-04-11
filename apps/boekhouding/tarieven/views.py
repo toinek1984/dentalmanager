@@ -9,9 +9,9 @@ def nza_index(request):
     return render(request, 'boekhouding/tarieven/index.html', {'codes': codes})
 
 def nza_add(request):
-    # Laat de gebruiker het aantal extra werkfase-formulieren kiezen via een GET-parameter 'extra'
     extra_forms = int(request.GET.get('extra', 1))
     WerkfaseFormSet = inlineformset_factory(NZACode, Werkfase, form=WerkfaseForm, extra=extra_forms, can_delete=False)
+    
     if request.method == 'POST':
         form = NZACodeForm(request.POST)
         formset = WerkfaseFormSet(request.POST)
@@ -19,15 +19,16 @@ def nza_add(request):
             nza = form.save()
             formset.instance = nza
             formset.save()
-            # Optioneel: verwijder werkfase-objecten met een nulduur
             for wf in nza.werkfases.all():
                 if wf.duur == timedelta(0):
                     wf.delete()
-            return redirect('nza_index')
+            return redirect('tarieven:nza_index')
     else:
         form = NZACodeForm()
         formset = WerkfaseFormSet()
+
     return render(request, 'boekhouding/tarieven/add.html', {'form': form, 'formset': formset})
+
 
 def nza_edit(request, pk):
     nza = get_object_or_404(NZACode, pk=pk)
