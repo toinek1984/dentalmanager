@@ -1,18 +1,18 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Facturatie Dashboard{% endblock %}
+{% block title %}Debiteuren Dashboard{% endblock %}
 
 {% block content %}
-<h1>Facturatie Dashboard</h1>
-<a href="{% url 'facturatie:toevoegen' %}" class="btn">Nieuwe Factuur Toevoegen</a>
+<h1>Debiteuren Dashboard</h1>
+<a href="{% url 'debiteuren:toevoegen' %}" class="btn">Nieuwe Debiteur Toevoegen</a>
 <ul>
   {% for item in items %}
     <li>
-      <a href="{% url 'facturatie:detail' item.pk %}">{{ item.factuurnummer }}</a>
+      <a href="{% url 'debiteuren:detail' item.pk %}">{{ item.naam }}</a>
     </li>
   {% empty %}
-    <li>Geen facturen gevonden.</li>
+    <li>Geen debiteuren gevonden.</li>
   {% endfor %}
 </ul>
 {% endblock %}

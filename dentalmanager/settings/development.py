@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     'django_otp.plugins.otp_static',
     'django_otp.plugins.otp_totp',
     'two_factor',  # Of 'django_two_factor', afhankelijk van de package-versie
+    'apps.core',
 
     # Eigen apps (project-specifiek)
     # Indien je een algemene boekhouding-app niet gebruikt (en enkel de submodules via de AppConfigs),

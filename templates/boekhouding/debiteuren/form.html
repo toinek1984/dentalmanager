@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Factuur Formulier{% endblock %}
+{% block title %}Debiteur Formulier{% endblock %}
 
 {% block content %}
-<h1>Factuur Formulier</h1>
+<h1>Debiteur Formulier</h1>
 <form method="post">
   {% csrf_token %}
   {{ form.as_p }}

@@ -15,6 +15,9 @@ urlpatterns = [
     path('boekhouding/crediteuren/', include('apps.boekhouding.crediteuren.urls')),
     path('boekhouding/debiteuren/', include('apps.boekhouding.debiteuren.urls')),
     path('boekhouding/facturatie/', include('apps.boekhouding.facturatie.urls')),
+    path('boekhouding/laboratorium/', include('apps.boekhouding.laboratorium.urls', namespace='laboratorium')),
+    path('boekhouding/kunstgebitaanhuis/', include('apps.boekhouding.kunstgebitaanhuis.urls', namespace='kunstgebitaanhuis')),
+
 
     # Specifieke route voor de grootboekrekeningen-submodule
     path('boekhouding/grootboekrekeningen/', include('apps.boekhouding.grootboekrekeningen.urls', namespace='grootboekrekeningen')),

@@ -1,17 +1,17 @@
 {% extends 'base.html' %}
 {% load static %}
-{# Indien je custom filters hebt, bijvoorbeeld get_item, laad die hier. {% load core_extras %} #}
+{# Als je een custom filter get_item gebruikt, laad die dan: {% load core_extras %} #}
 
-{% block title %}Laboratorium Overzicht{% endblock %}
+{% block title %}Kunstgebit aan Huis Overzicht{% endblock %}
 
 {% block content %}
 <div class="no-print">
-  <h1>Laboratorium Overzicht</h1>
+  <h1>Kunstgebit aan Huis Overzicht</h1>
 
-  <!-- Filter Formulier -->
+  <!-- Filterformulier -->
   <form method="get">
     <fieldset>
-      <legend>Selecteer Periode, Technicus en Grootboekrekening</legend>
+      <legend>Selecteer Periode, Behandelaar en Grootboekrekening</legend>
       
       <label for="quarter1">Periode 1 – Kwartaal:</label>
       <select name="quarter1" id="quarter1">
@@ -37,8 +37,8 @@
 
       <br>
 
-      <label for="technicus">Technicus (optioneel):</label>
-      <input type="text" name="technicus" id="technicus" value="{{ selected_technicus }}" placeholder="Alle technici">
+      <label for="behandelaar">Behandelaar (optioneel):</label>
+      <input type="text" name="behandelaar" id="behandelaar" value="{{ selected_behandelaar }}" placeholder="Alle behandelaren">
 
       <br>
 
@@ -67,7 +67,7 @@
   <thead>
     <tr>
       <th></th>
-      <th>Facturabel Omzet</th>
+      <th>Honorarium (Facturabel)</th>
       <th>Garantie (Faalkosten)</th>
       <th>Inkoop</th>
       <th>Winst/Verlies</th>
@@ -91,21 +91,21 @@
   </tbody>
 </table>
 
-<!-- Grafieken met Chart.js -->
-<div style="display: flex; gap: 20px; margin-top: 20px;">
-  <div style="flex: 1;">
-    <h3>Facturabel Omzet</h3>
-    <canvas id="facturabelChart"></canvas>
+<!-- Grafieken via Chart.js -->
+<div style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px;">
+  <div style="flex: 1; min-width: 300px;">
+    <h3>Honorarium</h3>
+    <canvas id="honorariumChart"></canvas>
   </div>
-  <div style="flex: 1;">
+  <div style="flex: 1; min-width: 300px;">
     <h3>Garantie (Faalkosten)</h3>
     <canvas id="garantieChart"></canvas>
   </div>
-  <div style="flex: 1;">
+  <div style="flex: 1; min-width: 300px;">
     <h3>Inkoop</h3>
     <canvas id="inkoopChart"></canvas>
   </div>
-  <div style="flex: 1;">
+  <div style="flex: 1; min-width: 300px;">
     <h3>Winst/Verlies</h3>
     <canvas id="winstChart"></canvas>
   </div>
@@ -138,7 +138,7 @@
     });
   }
 
-  createChart('facturabelChart', 'Facturabel Omzet', graphData.facturabel, ['rgba(75,192,192,0.7)', 'rgba(75,192,192,0.4)']);
+  createChart('honorariumChart', 'Honorarium', graphData.honorarium, ['rgba(75,192,192,0.7)', 'rgba(75,192,192,0.4)']);
   createChart('garantieChart', 'Garantie (Faalkosten)', graphData.garantie, ['rgba(255,99,132,0.7)', 'rgba(255,99,132,0.4)']);
   createChart('inkoopChart', 'Inkoop', graphData.inkoop, ['rgba(54,162,235,0.7)', 'rgba(54,162,235,0.4)']);
   createChart('winstChart', 'Winst/Verlies', graphData.winst, ['rgba(153,102,255,0.7)', 'rgba(153,102,255,0.4)']);

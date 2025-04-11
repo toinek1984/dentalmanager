@@ -10,4 +10,5 @@ urlpatterns = [
     path('nieuw/', views.werknemer_add, name='add'),
     path('bewerk/<int:pk>/', views.werknemer_edit, name='edit'),
     path('detail/<int:pk>/', views.werknemer_detail, name='detail'),
+    path('insights/<int:pk>/', views.werknemer_insights, name='insights'),
 ]
