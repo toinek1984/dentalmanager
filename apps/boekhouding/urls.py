@@ -2,6 +2,9 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
+    path('crediteuren/', include('apps.boekhouding.crediteuren.urls', namespace='crediteuren')),
+    path('debiteuren/', include('apps.boekhouding.debiteuren.urls', namespace='debiteuren')),
+    path('facturatie/', include('apps.boekhouding.facturatie.urls', namespace='facturatie')),
     path('dashboard/', views.dashboard, name='boekhouding_dashboard'),
     path('marketing/', include('apps.boekhouding.marketing.urls')),
     path('tarieven/', include('apps.boekhouding.tarieven.urls')),

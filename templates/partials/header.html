@@ -5,7 +5,7 @@
       <li><button onclick="location.href='/'" class="btn">Home</button></li>
 
       <li class="dropdown">
-        <button class="btn dropdown-btn">Boekhouding</button>
+        <button onclick="return false;" class="btn dropdown-btn">Boekhouding</button>
         <ul class="submenu">
           <li><a href="/boekhouding/crediteuren/">Crediteuren</a></li>
           <li><a href="/boekhouding/debiteuren/">Debiteuren</a></li>
@@ -22,7 +22,7 @@
       <li><button onclick="location.href='/wagenpark/'" class="btn">Wagenpark</button></li>
 
       <li class="dropdown">
-        <button class="btn dropdown-btn">Klanten</button>
+        <button onclick="return false;" class="btn dropdown-btn">Klanten</button>
         <ul class="submenu">
           <li><a href="/klanten/dossiers/">Klantendossier</a></li>
           <li><a href="/klanten/klantenoverzicht/">Klantenoverzicht</a></li>
@@ -31,7 +31,7 @@
       </li>
 
       <li class="dropdown">
-        <button class="btn dropdown-btn">HR</button>
+        <button onclick="return false;" class="btn dropdown-btn">HR</button>
         <ul class="submenu">
           <li><a href="/hr/werknemers/">Werknemers</a></li>
           <li><a href="/hr/salarisadministratie/">Salarisadministratie</a></li>
@@ -43,7 +43,7 @@
       </li>
 
       <li class="dropdown">
-        <button class="btn dropdown-btn">Planning</button>
+        <button onclick="return false;" class="btn dropdown-btn">Planning</button>
         <ul class="submenu">
           <li><a href="/planning/aanmaken/">Werkbon Aanmaken</a></li>
           <li><a href="/planning/planning_behandelaren/">Behandelaren</a></li>
@@ -62,22 +62,23 @@
 </header>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.dropdown-btn').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        var submenu = this.nextElementSibling;
-        document.querySelectorAll('.submenu').forEach(function (menu) {
-          if (menu !== submenu) menu.style.display = 'none';
-        });
-        submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
-      });
-    });
-
-    document.addEventListener('click', function () {
+document.addEventListener('DOMContentLoaded', function () {
+  // Dropdown functionaliteit
+  document.querySelectorAll('.dropdown-btn').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var submenu = this.nextElementSibling;
       document.querySelectorAll('.submenu').forEach(function (menu) {
-        menu.style.display = 'none';
+        if (menu !== submenu) menu.style.display = 'none';
       });
+      submenu.style.display = (submenu.style.display === 'block') ? 'none' : 'block';
     });
   });
+  // Sluit dropdowns bij klikken buiten de menu
+  document.addEventListener('click', function () {
+    document.querySelectorAll('.submenu').forEach(function (menu) {
+      menu.style.display = 'none';
+    });
+  });
+});
 </script>

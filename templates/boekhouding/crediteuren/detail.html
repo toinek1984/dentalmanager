@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Crediteur Details{% endblock %}
+
+{% block content %}
+<h1>Details van {{ item.naam }}</h1>
+<p><strong>Adres:</strong> {{ item.adres }}</p>
+<p><strong>Telefoonnummer:</strong> {{ item.telefoonnummer }}</p>
+<p><strong>Email:</strong> {{ item.email }}</p>
+<p><strong>IBAN:</strong> {{ item.iban }} | <strong>BIC:</strong> {{ item.bic }}</p>
+<p><strong>Betaalvoorwaarden:</strong> {{ item.betaalvoorwaarden }}</p>
+<p><strong>Omschrijving:</strong> {{ item.omschrijving }}</p>
+<a href="{% url 'crediteuren:bewerken' item.pk %}">Bewerken</a>
+{% endblock %}

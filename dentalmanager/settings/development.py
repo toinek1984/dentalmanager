@@ -28,6 +28,9 @@ INSTALLED_APPS = [
     'apps.boekhouding.laboratorium',
     'apps.boekhouding.kunstgebitaanhuis',
     'apps.boekhouding.totaal_overzicht',
+    'apps.boekhouding.crediteuren',
+    'apps.boekhouding.debiteuren',
+    'apps.boekhouding.facturatie',
 
     'apps.wagenpark',
     'apps.klanten',

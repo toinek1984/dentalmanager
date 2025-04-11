@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Crediteuren Dashboard{% endblock %}
+
+{% block content %}
+<h1>Crediteuren Dashboard</h1>
+<a href="{% url 'crediteuren:toevoegen' %}" class="btn">Nieuwe Crediteur Toevoegen</a>
+<ul>
+  {% for item in items %}
+    <li>
+      <a href="{% url 'crediteuren:detail' item.pk %}">{{ item.naam }}</a>
+    </li>
+  {% empty %}
+    <li>Geen crediteuren gevonden.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

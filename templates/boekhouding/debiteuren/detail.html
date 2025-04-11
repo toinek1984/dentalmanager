@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Factuur Details{% endblock %}
+
+{% block content %}
+<h1>Details van Factuur {{ item.factuurnummer }}</h1>
+<p><strong>Datum:</strong> {{ item.datum }}</p>
+<p><strong>Type:</strong> {{ item.get_factuur_type_display }}</p>
+<p><strong>Bedrag (excl. BTW):</strong> €{{ item.bedrag_excl_btw }}</p>
+<p><strong>BTW Percentage:</strong> {{ item.btw_percentage }}%</p>
+<p><strong>Totaal bedrag:</strong> €{{ item.totaal_bedrag }}</p>
+<p><strong>Status:</strong> {{ item.get_status_display }}</p>
+{% if item.factuur_type == 'verkoop' and item.debiteur %}
+  <p><strong>Debiteur:</strong> {{ item.debiteur.naam }}</p>
+{% elif item.factuur_type == 'inkoop' and item.crediteur %}
+  <p><strong>Crediteur:</strong> {{ item.crediteur.naam }}</p>
+{% endif %}
+<a href="{% url 'facturatie:bewerken' item.pk %}">Bewerken</a>
+{% endblock %}

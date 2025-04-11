@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Factuur Details{% endblock %}
+
+{% block content %}
+<h1>Details van Factuur {{ item.nummer }}</h1>
+<p>{{ item.omschrijving }}</p>
+<a href="{% url 'facturatie:bewerken' item.pk %}">Bewerken</a>
+{% endblock %}
