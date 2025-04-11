@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Werknemer Details</h1>
+<p><strong>Naam:</strong> {{ werknemer.voornaam }} {{ werknemer.achternaam }}</p>
+<p><strong>Geboortedatum:</strong> {{ werknemer.geboortedatum }}</p>
+<p><strong>Functie:</strong> {{ werknemer.functie }}</p>
+<p><strong>Uurloon:</strong> €{{ werknemer.uurloon }}</p>
+<p><strong>Grootboekrekening:</strong> {{ werknemer.loonrekening }}</p>
+<p><strong>Actief:</strong> {{ werknemer.actief|yesno:"Ja,Nee" }}</p>
+<a href="{% url 'werknemers:edit' werknemer.pk %}">Bewerk</a>
+{% endblock %}
+
