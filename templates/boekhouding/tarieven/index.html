@@ -17,7 +17,7 @@
             {% endfor %}
             </ul>
         {% endif %}
-        <a href="{% url 'nza_edit' code.pk %}">Bewerk</a>
+        <a href="{% url 'tarieven:nza_edit' code.pk %}">Bewerk</a>
     </li>
     {% empty %}
     <li>Geen NZA Codes gevonden.</li>

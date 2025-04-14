@@ -7,8 +7,10 @@ urlpatterns = [
     path('facturatie/', include('apps.boekhouding.facturatie.urls', namespace='facturatie')),
     path('dashboard/', views.dashboard, name='boekhouding_dashboard'),
     path('marketing/', include('apps.boekhouding.marketing.urls')),
-    path('tarieven/', include('apps.boekhouding.tarieven.urls')),
+    path('tarieven/', include('apps.boekhouding.tarieven.urls', namespace= 'tarieven')),
     path('grootboekrekeningen/', include('apps.boekhouding.grootboekrekeningen.urls', namespace='grootboekrekeningen')),
+    path('kunstgebitaanhuis/', include('apps.boekhouding.kunstgebitaanhuis.urls')),
+    path('laboratorium/', include('apps.boekhouding.laboratorium.urls')),
 
     # Voeg hier andere routes toe
 ]

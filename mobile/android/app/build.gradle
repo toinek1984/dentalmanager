@@ -1,0 +1,11 @@
+dependencies {
+    // ZXing library voor scannen
+    implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    
+    // Retrofit voor REST API calls (optioneel, als je REST gebruikt)
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    
+    // Overige dependencies...
+}
