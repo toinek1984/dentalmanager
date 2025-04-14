@@ -1,85 +1,113 @@
 import random
-from datetime import datetime
+import json
+from datetime import datetime, date
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from django.http import HttpResponseBadRequest, JsonResponse
+from django.http import HttpResponseBadRequest, JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 
-# Let op: controleer of deze importlocaties overeenkomen met jouw project.
-# In veel projecten staat het Klant-model in apps/klanten/models.py,
-# maar hier gaan we ervan uit dat je het via apps/planning.models importeert.
-from apps.planning.models import Werkbon, Klant, Opdrachtgever, generate_werkbonnummer
+# Importeer het Klant-model en Opdrachtgever vanuit de klanten-app
+from apps.klanten.models import Klant, Opdrachtgever
+# Overige modellen en functies
+from apps.planning.models import Werkbon, generate_werkbonnummer
 from apps.boekhouding.tarieven.models import NZACode
 from apps.hr.werknemers.models import Werknemer
-from apps.planning.forms import WerkbonForm  # Zorg dat je een ModelForm voor Werkbon hebt
+from apps.planning.forms import WerkbonForm
 
-# --------------------------------------------------------------------------------------
-# AJAX zoekfuncties
-# --------------------------------------------------------------------------------------
+# -------------------------------------------------------------------
+# AJAX Zoekfuncties
+# -------------------------------------------------------------------
 def search_klant(request):
-    """
-    Zoekt klanten op basis van de zoekterm in het 'term'-queryparameter.
-    Retourneert een JSON-lijst met de gevonden klantgegevens.
-    """
     zoekterm = request.GET.get('term', '').strip()
-    # We zoeken in het veld 'naam'. Pas dit aan als jouw model andere velden heeft (bv. voornaam, achternaam).
     klanten = Klant.objects.filter(naam__icontains=zoekterm).values(
         'id', 'naam', 'adres', 'woonplaats', 'telefoon', 'email'
     )
     return JsonResponse(list(klanten), safe=False)
 
 def search_opdrachtgever(request):
-    """
-    Zoekt opdrachtgevers op basis van de zoekterm in het 'term'-queryparameter.
-    Retourneert een JSON-lijst met de gevonden opdrachtgevergegevens.
-    """
     zoekterm = request.GET.get('term', '').strip()
     opdrachtgevers = Opdrachtgever.objects.filter(naam__icontains=zoekterm).values(
         'id', 'naam', 'adres', 'woonplaats', 'telefoon', 'email'
     )
     return JsonResponse(list(opdrachtgevers), safe=False)
 
-# --------------------------------------------------------------------------------------
-# Helperfunctie voor het aanmaken van een klantdossier
-# --------------------------------------------------------------------------------------
+# -------------------------------------------------------------------
+# Helper: Creëer KlantDossier voor een Klant
+# -------------------------------------------------------------------
 def create_klantdossier_for_klant(klant):
     """
-    Deze functie maakt (of controleert) een klantdossier voor de gegeven klant.
-    Pas de implementatie aan op basis van jouw eigen logica en het model van het klantdossier.
+    Zorgt dat er een KlantDossier bestaat voor de gegeven klant.
+    Debugt het type en de inhoud van 'klant'.
     """
-    # Voorbeeld: als je KlantDossier in apps/klanten/klantdossier/models.py staat
+    print("DEBUG: Klant type:", type(klant))
+    print("DEBUG: Klant:", klant)
+    
     from apps.klanten.klantdossier.models import KlantDossier
     dossier, created = KlantDossier.objects.get_or_create(klant=klant)
     if created:
-        print(f"Klantdossier aangemaakt voor: {klant.naam}")
+        print(f"Klantdossier aangemaakt voor: {klant}")
     else:
-        print(f"Klantdossier bestaat al voor: {klant.naam}")
+        print(f"Klantdossier bestaat al voor: {klant}")
     return dossier
 
-# --------------------------------------------------------------------------------------
-# View voor het aanmaken van een nieuwe werkbon
-# --------------------------------------------------------------------------------------
+# -------------------------------------------------------------------
+# Overige Views
+# -------------------------------------------------------------------
+def index(request):
+    return HttpResponse('Welkom bij de planning app!')
+
+def planboard(request):
+    werknemers = Werknemer.objects.all()
+    unscheduled_workbonnen = Werkbon.objects.filter(aanvang_werkzaamheden__isnull=True)
+    return render(request, 'planning/planboard.html', {
+        'werknemers': werknemers,
+        'unscheduled_workbonnen': unscheduled_workbonnen
+    })
+
+def planboard_resource(request):
+    werknemers = Werknemer.objects.all()
+    unscheduled_workbonnen = Werkbon.objects.filter(aanvang_werkzaamheden__isnull=True)
+    return render(request, 'planning/planboard_resource.html', {
+        'werknemers': werknemers,
+        'unscheduled_workbonnen': unscheduled_workbonnen
+    })
+
+def werkbonnen(request):
+    werkbon_list = Werkbon.objects.all().order_by('-aanmaakdatum')
+    return render(request, 'planning/werkbon_overzicht.html', {'werkbonnen': werkbon_list})
+
+def print_werkbon(request, pk):
+    werkbon = get_object_or_404(Werkbon, pk=pk)
+    return render(request, 'planning/print.html', {'werkbon': werkbon})
+
+# -------------------------------------------------------------------
+# View: Aanmaken van een nieuwe Werkbon
+# -------------------------------------------------------------------
 def create_werkbon(request):
     """
-    Deze view verwerkt een POST-request om een nieuwe werkbon aan te maken.
-    Hij haalt klantgegevens op, maakt (indien nodig) een klant en een klantdossier,
-    verwerkt opdrachtgevergegevens en de werkbon-specifieke gegevens, genereert een uniek werkbonnummer,
-    en maakt de werkbon aan. Afhankelijk van de actie (opslaan of opslaan en print) wordt er geredirect.
+    Verwerkt een POST-request om een nieuwe werkbon aan te maken.
+    Combineert de klantvelden (voornaam en achternaam) tot één volledige naam
+    en verwerkt de overige velden.
     """
     if request.method == "POST":
-        # ----- Klantgegevens ophalen of aanmaken -----
-        klant_naam = request.POST.get('klant_naam', '').strip()
-        if not klant_naam:
-            return HttpResponseBadRequest("Klantnaam is verplicht.")
-        klant_adres = request.POST.get('klant_adres', '')
-        klant_woonplaats = request.POST.get('klant_woonplaats', '')
+        # Klantgegevens: aparte velden voor voornaam en achternaam.
+        klant_voornaam = request.POST.get('klant_voornaam', '').strip()
+        klant_achternaam = request.POST.get('klant_achternaam', '').strip()
+        if not klant_voornaam or not klant_achternaam:
+            return HttpResponseBadRequest("Zowel voornaam als achternaam van de klant zijn verplicht.")
+        klant_volledige_naam = f"{klant_voornaam} {klant_achternaam}"
+        
+        # Overige klantgegevens
+        klant_adres = request.POST.get('klant_adres', '').strip()
+        klant_woonplaats = request.POST.get('klant_woonplaats', '').strip()
         klant_geboortedatum = request.POST.get('klant_geboortedatum') or None
-        klant_telefoon = request.POST.get('klant_telefoon', '')
-        klant_email = request.POST.get('klant_email', '')
-        klant_verzekeringsnummer = request.POST.get('klant_verzekeringsnummer', '')
-
-        # Gebruik get_or_create om een klant te vinden of aan te maken.
+        klant_telefoon = request.POST.get('klant_telefoon', '').strip()
+        klant_email = request.POST.get('klant_email', '').strip()
+        klant_verzekeringsnummer = request.POST.get('klant_verzekeringsnummer', '').strip()
+        
+        # Haal of maak de klant op via het centrale Klant-model (uit apps/klanten/models.py)
         klant, created = Klant.objects.get_or_create(
-            naam=klant_naam,
+            naam=klant_volledige_naam,
             defaults={
                 'adres': klant_adres,
                 'woonplaats': klant_woonplaats,
@@ -89,12 +117,11 @@ def create_werkbon(request):
                 'verzekeringsnummer': klant_verzekeringsnummer,
             }
         )
-
-        # Maak een klantdossier aan als de klant nieuw is.
+        print("DEBUG: Klant uit get_or_create:", klant, type(klant))
         if created:
             create_klantdossier_for_klant(klant)
-
-        # ----- Opdrachtgevergegevens ophalen of aanmaken -----
+        
+        # Opdrachtgevergegevens
         opdrachtgever_naam = request.POST.get('opdrachtgever_naam', '').strip()
         opdrachtgever = None
         if opdrachtgever_naam:
@@ -102,18 +129,18 @@ def create_werkbon(request):
             if not opdrachtgever:
                 opdrachtgever = Opdrachtgever.objects.create(
                     naam=opdrachtgever_naam,
-                    adres=request.POST.get('opdrachtgever_adres', ''),
-                    telefoon=request.POST.get('opdrachtgever_telefoon', ''),
-                    email=request.POST.get('opdrachtgever_email', '')
+                    adres=request.POST.get('opdrachtgever_adres', '').strip(),
+                    telefoon=request.POST.get('opdrachtgever_telefoon', '').strip(),
+                    email=request.POST.get('opdrachtgever_email', '').strip()
                 )
-
-        # ----- Werkbon Specifieke Gegevens -----
+        
+        # Werkbon-specifieke gegevens
         gebitsdatum = request.POST.get('gebitsdatum') or None
-        tandkleur = request.POST.get('tandkleur', '')
-        aanvang_werkzaamheden = None  # Wordt later ingesteld door de planning
+        tandkleur = request.POST.get('tandkleur', '').strip()
+        aanvang_werkzaamheden = None  # Wordt later ingesteld
         naaminpersen = (request.POST.get('naaminpersen') == 'on')
-
-        # Haal werknemer-ID's op voor behandelaar en technicus.
+        
+        # Medewerker-ID's voor behandelaar en technicus (vanuit het formulier als id's)
         behandelaar_id = request.POST.get('behandelaar', '').strip()
         technicus_id = request.POST.get('technicus', '').strip()
         if not behandelaar_id.isdigit():
@@ -128,14 +155,21 @@ def create_werkbon(request):
             technicus = Werknemer.objects.get(id=int(technicus_id))
         except Werknemer.DoesNotExist:
             return HttpResponseBadRequest("Technicus niet gevonden.")
-
-        if not behandelaar.naam:
-            return HttpResponseBadRequest("De geselecteerde behandelaar heeft geen naam.")
-
-        notities = request.POST.get('notities', '')
-        facturabel_garantie = request.POST.get('facturabel_garantie', '')
-
-        # ----- Verwerk het NZACode veld -----
+        
+        # Controleer of de werknemers de velden voornaam en achternaam hebben
+        if not (behandelaar.voornaam and behandelaar.achternaam):
+            return HttpResponseBadRequest("De geselecteerde behandelaar heeft geen volledige naam.")
+        if not (technicus.voornaam and technicus.achternaam):
+            return HttpResponseBadRequest("De geselecteerde technicus heeft geen volledige naam.")
+        
+        # Combineer de volledige namen voor opslag
+        behandelaar_fullname = f"{behandelaar.voornaam} {behandelaar.achternaam}"
+        technicus_fullname = f"{technicus.voornaam} {technicus.achternaam}"
+        
+        notities = request.POST.get('notities', '').strip()
+        facturabel_garantie = request.POST.get('facturabel_garantie', '').strip()
+        
+        # Verwerk het NZACode veld (als een nummer)
         nza_code_pk = request.POST.get('nza_code', '').strip()
         nza_instance = None
         if nza_code_pk.isdigit():
@@ -143,54 +177,54 @@ def create_werkbon(request):
                 nza_instance = NZACode.objects.get(pk=int(nza_code_pk))
             except NZACode.DoesNotExist:
                 nza_instance = None
-
-        # ----- Genereer een uniek werkbonnummer -----
-        base_werkbonnummer = generate_werkbonnummer()  # Bijvoorbeeld: "A787F98C"
+        
+        # Genereer een uniek werkbonnummer
+        base_werkbonnummer = generate_werkbonnummer()
         werkbonnummer = f"{base_werkbonnummer}_{random.randint(1000, 9999)}"
-
-        # ----- Maak de Werkbon aan -----
+        
+        # Maak de werkbon aan
         werkbon = Werkbon.objects.create(
-            klant=klant,
+           #klant=klant 
             opdrachtgever=opdrachtgever,
             gebitsdatum=gebitsdatum,
             tandkleur=tandkleur,
             aanvang_werkzaamheden=aanvang_werkzaamheden,
             naaminpersen=naaminpersen,
-            # Opmerking: Zorg ervoor dat het veld 'behandelaar' in het Werkbon-model
-            # juist gedefinieerd is (als ForeignKey verwacht dan geef je het klantobject mee,
-            # als CharField geef je de naam mee). Hier gaan we ervan uit dat het een CharField is.
-            behandelaar=behandelaar.naam,
-            technicus=technicus.naam,
+            behandelaar=behandelaar_fullname,
+            technicus=technicus_fullname,
             notities=notities,
             nza_code=nza_instance,
             facturabel_garantie=facturabel_garantie,
             werkbonnummer=werkbonnummer
         )
-
-        print("Werkbon aangemaakt met barcode:", werkbon.barcode)
-
-        # Redirect afhankelijk van de actie ("print" of "save")
+        
+        # Debug: Print werkbonnummer of barcode indien aanwezig
+        if hasattr(werkbon, 'barcode'):
+            print("Werkbon aangemaakt met barcode:", werkbon.barcode)
+        else:
+            print("Werkbon aangemaakt met werkbonnummer:", werkbonnummer)
+        
+        # Redirect op basis van de actie ("print" of "save")
         if request.POST.get('action') == 'print':
             return redirect(reverse('planning:werkbon_print', args=[werkbon.pk]))
         else:
             return redirect(reverse('planning:planboard'))
+    
+    else:
+        form = WerkbonForm()
+        nza_codes = NZACode.objects.all()
+        werknemers = Werknemer.objects.all()
+        context = {
+            'form': form,
+            'nza_codes': nza_codes,
+            'werknemers': werknemers,
+        }
+        return render(request, 'planning/form.html', context)
 
-    # Voor GET-verzoeken: toon het formulier
-    nza_codes = NZACode.objects.all()
-    werknemers = Werknemer.objects.all()
-    context = {
-        'nza_codes': nza_codes,
-        'werknemers': werknemers,
-    }
-    return render(request, 'planning/form.html', context)
-
-# --------------------------------------------------------------------------------------
-# Edit view voor bestaande werkbonnen
-# --------------------------------------------------------------------------------------
+# -------------------------------------------------------------------
+# View: Bewerken van een bestaande Werkbon
+# -------------------------------------------------------------------
 def edit_werkbon(request, pk):
-    """
-    Deze view laadt een bestaande werkbon en laat deze bewerken met een ModelForm.
-    """
     werkbon = get_object_or_404(Werkbon, pk=pk)
     if request.method == "POST":
         form = WerkbonForm(request.POST, instance=werkbon)
@@ -198,8 +232,45 @@ def edit_werkbon(request, pk):
             form.save()
             return redirect(reverse('planning:werkbon_overzicht'))
         else:
-            # Toon het formulier opnieuw als er fouten zijn
             return render(request, 'planning/edit_werkbon.html', {'form': form, 'werkbon': werkbon})
     else:
         form = WerkbonForm(instance=werkbon)
     return render(request, 'planning/edit_werkbon.html', {'form': form, 'werkbon': werkbon})
+
+
+# -------------------------------------------------------------------
+# API Endpoint: Update Werkbon (voor mobiele scanners, etc.)
+# -------------------------------------------------------------------
+@csrf_exempt
+def update_workbon(request):
+    """
+    Update de werkbon-status via een POST-request met een JSON-payload.
+    Voorbeeld JSON:
+    {
+       "werkbon_id": "123",
+       "action": "fase_afgerond"  // of "gereed"
+    }
+    """
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            werkbon_id = data.get('werkbon_id')
+            action = data.get('action')
+            
+            werkbon = Werkbon.objects.get(pk=werkbon_id)
+            
+            if action == 'fase_afgerond':
+                werkbon.status = 'fase_afgerond'
+            elif action == 'gereed':
+                werkbon.status = 'gereed'
+            else:
+                return JsonResponse({'success': False, 'message': f'Onbekende actie: {action}'}, status=400)
+            
+            werkbon.save()
+            return JsonResponse({'success': True, 'message': 'Werkbon status succesvol bijgewerkt'})
+        except Werkbon.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Werkbon niet gevonden'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'Fout: {str(e)}'}, status=500)
+    else:
+        return JsonResponse({'success': False, 'message': 'Gebruik een POST-request'}, status=400)

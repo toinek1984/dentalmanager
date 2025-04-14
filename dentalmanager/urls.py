@@ -11,31 +11,24 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
 
     # Boekhouding: dit is de algemene boekhouding-route
-    path('boekhouding/', include('apps.boekhouding.urls')),
-    path('boekhouding/crediteuren/', include('apps.boekhouding.crediteuren.urls')),
-    path('boekhouding/debiteuren/', include('apps.boekhouding.debiteuren.urls')),
-    path('boekhouding/facturatie/', include('apps.boekhouding.facturatie.urls')),
-    path('boekhouding/laboratorium/', include('apps.boekhouding.laboratorium.urls', namespace='laboratorium')),
-    path('boekhouding/kunstgebitaanhuis/', include('apps.boekhouding.kunstgebitaanhuis.urls', namespace='kunstgebitaanhuis')),
+    path('boekhouding/', include(('apps.boekhouding.urls', 'boekhouding'), namespace='boekhouding')),
+    path('planning/', include(('apps.planning.urls', 'planning'), namespace='planning')),
 
 
     # Specifieke route voor de grootboekrekeningen-submodule
-    path('boekhouding/grootboekrekeningen/', include('apps.boekhouding.grootboekrekeningen.urls', namespace='grootboekrekeningen')),
+
     
     # Andere apps
     path('wagenpark/', include('apps.wagenpark.urls')),
     path('klanten/', include('apps.klanten.urls')),
     path('hr/', include('apps.hr.urls')),
-    path('planning/', include('apps.planning.urls', namespace='planning')),
     path('planning/aanmaken/', include(('apps.planning.aanmaken_werkbon.urls', 'aanmaken_werkbon'), namespace='aanmaken_werkbon')),
     path('magazijn/', include('apps.magazijn.urls')),
     path('beheerders/', include('apps.beheerderspagina.urls')),
     path('login/', include('apps.log_in_pagina.urls')),
-    path('klantdossier/', include(('apps.klanten.klantdossier.urls', 'klantdossier'), namespace='klantdossier')),
 
-    # Een globale dashboard-route (optioneel)
-    path('dashboard/', include('apps.boekhouding.grootboekrekeningen.urls', namespace='grootboekrekeningen')),
-     path('tarieven/', include('apps.boekhouding.tarieven.urls', namespace='tarieven')),
+
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

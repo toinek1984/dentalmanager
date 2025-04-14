@@ -9,7 +9,6 @@ class Klant(models.Model):
     telefoon = models.CharField(max_length=15, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     verzekeringsnummer = models.CharField(max_length=50, blank=True, null=True)
-    
     # Extra velden
     mantelzorger = models.BooleanField(default=False)
     mantelzorger_naam = models.CharField(max_length=255, blank=True, null=True)
@@ -20,6 +19,8 @@ class Klant(models.Model):
 
     def __str__(self):
         return self.naam
+
+
 
 class Opdrachtgever(models.Model):
     naam = models.CharField("Naam", max_length=100)

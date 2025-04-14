@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from apps.boekhouding.marketing.models import MarketingCampagne
 from apps.boekhouding.tarieven.models import NZACode
+from apps.klanten.models import Klant 
 
 # Hulpfuncties
 def generate_werkbonnummer():
@@ -46,6 +47,7 @@ def generate_barcode_image(code_value):
 # --------------------------
 class Klant(models.Model):
     naam = models.CharField("Naam", max_length=100)
+    achternaam = models.CharField("Naam", max_length=100)
     adres = models.CharField("Adres", max_length=200, blank=True)
     woonplaats = models.CharField("Woonplaats", max_length=100, blank=True)
     geboortedatum = models.DateField("Geboortedatum", null=True, blank=True)
@@ -111,12 +113,39 @@ FACTURABEL_GARANTIE_CHOICES = [
 # Werkbon Model
 # --------------------------
 class Werkbon(models.Model):
-    werkbonnummer = models.CharField("Werkbonnummer", max_length=20, unique=True, blank=True)
-    barcode = models.CharField("Barcode", max_length=100, unique=True, blank=True)
-    barcode_image = models.ImageField(upload_to='barcodes/', blank=True, null=True)
+    werkbonnummer = models.CharField(
+        "Werkbonnummer", 
+        max_length=20, 
+        unique=True, 
+        blank=True,
+        help_text="Uniek nummer dat de werkbon identificeert."
+    )
+    barcode = models.CharField(
+        "Barcode", 
+        max_length=100, 
+        unique=True, 
+        blank=True,
+        help_text="Barcode voor automatische identificatie."
+    )
+    barcode_image = models.ImageField(
+        upload_to='barcodes/', 
+        blank=True, 
+        null=True,
+        help_text="Afbeelding van de gegenereerde barcode."
+    )
     
-    # Koppelingen
-    klant = models.ForeignKey(Klant, on_delete=models.SET_NULL, null=True, blank=True, related_name='werkbonnen')
+    # Koppeling naar een Klant.
+    # Met on_delete=SET_NULL blijven werkbonnen bewaard als de klant verwijderd wordt.
+    # Het verbose_name maakt het label in de admin en formulieren overzichtelijk.
+    klant = models.ForeignKey(
+        Klant, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='werkbonnen',
+        verbose_name="Klant"
+        
+    )    
     opdrachtgever = models.ForeignKey(Opdrachtgever, on_delete=models.SET_NULL, null=True, blank=True, related_name='werkbonnen')
     
     # Specifieke werkbongegevens

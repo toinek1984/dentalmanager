@@ -1,8 +1,10 @@
-# apps/klanten/klantdossier/models.py
 from django.db import models
-from apps.klanten.models import Klant  # Zorg dat je hier verwijst naar het Klant-model uit de hoofd-app
+from apps.klanten.models import Klant  # Zorg dat dit het centrale Klant-model is
 
 class KlantDossier(models.Model):
+    """
+    KlantDossier gekoppeld aan een Klant.
+    """
     klant = models.OneToOneField(Klant, on_delete=models.CASCADE, related_name='dossier')
     aangemaakt_op = models.DateTimeField(auto_now_add=True)
     klantnummer = models.AutoField(primary_key=True)

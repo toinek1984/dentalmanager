@@ -18,18 +18,29 @@
         
         <!-- Nieuwe klantgegevens, standaard verborgen -->
         <div id="nieuwe_klant_form" style="display:none; margin-top:10px;">
-            <label for="nieuwe_klant_adres">Adres:</label>
-            <input type="text" id="nieuwe_klant_adres" name="nieuwe_klant_adres"><br>
-            <label for="nieuwe_klant_woonplaats">Woonplaats:</label>
-            <input type="text" id="nieuwe_klant_woonplaats" name="nieuwe_klant_woonplaats"><br>
-            <label for="nieuwe_klant_geboortedatum">Geboortedatum:</label>
-            <input type="date" id="nieuwe_klant_geboortedatum" name="nieuwe_klant_geboortedatum"><br>
-            <label for="nieuwe_klant_telefoon">Telefoonnummer:</label>
-            <input type="text" id="nieuwe_klant_telefoon" name="nieuwe_klant_telefoon"><br>
-            <label for="nieuwe_klant_email">Email:</label>
-            <input type="email" id="nieuwe_klant_email" name="nieuwe_klant_email"><br>
-            <label for="nieuwe_klant_verzekeringsnummer">Verzekeringsnummer:</label>
-            <input type="text" id="nieuwe_klant_verzekeringsnummer" name="nieuwe_klant_verzekeringsnummer"><br>
+            <label for="klant_voornaam">Voornaam:</label>
+        <input type="text" id="klant_voornaam" name="klant_voornaam" placeholder="Voornaam">
+        <br>
+        <label for="klant_achternaam">Achternaam:</label>
+        <input type="text" id="klant_achternaam" name="klant_achternaam" placeholder="Achternaam">
+        <br>
+        <label for="klant_adres">Adres:</label>
+        <input type="text" id="klant_adres" name="klant_adres">
+        <br>
+        <label for="klant_woonplaats">Woonplaats:</label>
+        <input type="text" id="klant_woonplaats" name="klant_woonplaats">
+        <br>
+        <label for="klant_geboortedatum">Geboortedatum:</label>
+        <input type="date" id="klant_geboortedatum" name="klant_geboortedatum">
+        <br>
+        <label for="klant_telefoon">Telefoon:</label>
+        <input type="text" id="klant_telefoon" name="klant_telefoon">
+        <br>
+        <label for="klant_email">Email:</label>
+        <input type="email" id="klant_email" name="klant_email">
+        <br>
+        <label for="klant_verzekeringsnummer">Verzekeringsnummer:</label>
+        <input type="text" id="klant_verzekeringsnummer" name="klant_verzekeringsnummer">
         </div>
     </fieldset>
     
@@ -76,22 +87,23 @@
         <label for="naaminpersen">Naaminpersen:</label>
         <input type="checkbox" id="naaminpersen" name="naaminpersen"><br>
         
+        <legend>Medewerkers</legend>
         <label for="behandelaar">Behandelaar:</label>
         <select id="behandelaar" name="behandelaar">
             <option value="">Selecteer een behandelaar</option>
             {% for werknemer in werknemers %}
-                <option value="{{ werknemer.id }}">{{ werknemer.naam }}</option>
+                <option value="{{ werknemer.id }}">{{ werknemer.voornaam }} {{ werknemer.achternaam }}</option>
             {% endfor %}
-        </select><br>
-        
+        </select>
+        <br>
         <label for="technicus">Technicus:</label>
         <select id="technicus" name="technicus">
             <option value="">Selecteer een technicus</option>
             {% for werknemer in werknemers %}
-                <option value="{{ werknemer.id }}">{{ werknemer.naam }}</option>
+                <option value="{{ werknemer.id }}">{{ werknemer.voornaam }} {{ werknemer.achternaam }}</option>
             {% endfor %}
         </select><br>
-        
+		   
         <label for="notities">Notities:</label>
         <textarea id="notities" name="notities"></textarea><br>
         
