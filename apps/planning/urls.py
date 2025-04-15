@@ -1,4 +1,5 @@
 from django.urls import path, include
+from . import api_views
 from apps.planning.aanmaken_werkbon.views import(
     edit_werkbon, 
     index, planboard, planboard_resource, werkbonnen, print_werkbon,
@@ -12,6 +13,8 @@ urlpatterns = [
     path('planboard/', planboard, name='planboard'),
     path('planboard_resource/', planboard_resource, name='planboard_resource'),
     path('werkbon_overzicht/', werkbonnen, name='werkbon_overzicht'),
+    path('api/resources/', api_views.api_resources, name='api_resources'),
+    path('api/werkbonnen/', api_views.api_werkbonnen, name='api_werkbonnen'),
     path('print/<int:pk>/', print_werkbon, name='werkbon_print'),
     path('create/', create_werkbon, name='create_werkbon'),
     path('edit/<int:pk>/', edit_werkbon, name='edit_werkbon'),

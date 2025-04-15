@@ -1,30 +1,84 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load core_extras %}  {# Custom tag get_item, zorg dat deze correct staat in de map templatetags #}
 {% block title %}Planboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/planboard.css' %}">
+{% endblock %}
 
 {% block content %}
 <style>
   .planboard-container {
     display: flex;
     width: 100%;
-    height: calc(100vh - 170px); /* Houd rekening met header en footer */
+    height: calc(135vh - 140px); /* Houd rekening met header en footer */
+	overflow: hidden;
   }
+  /* Sidebar styling */
   #sidebar {
     flex: 0 0 15%;
     padding: 10px;
     border-right: 1px solid #ccc;
     overflow-y: auto;
+    order: 1;
   }
-  #calendar-container {
+  #sidebar-header {
+    margin-bottom: 10px;
+  }
+  #employee-select {
+    width: 100%;
+    padding: 5px;
+    font-size: 1em;
+  }
+  #add-workorder {
+    width: 100%;
+    padding: 8px;
+    margin-top: 10px;
+    background-color: #ccc;
+    border: none;
+    cursor: pointer;
+  }
+  /* Hoofdcontent styling */
+  #main-content {
     flex: 1;
     padding: 10px;
-    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    order: 2;
+  }
+  /* Kalender Container: Zorg voor voldoende hoogte */
+  #calendar-container {
+    width: 100%;
+    height: 100%;  /* Verhoog dit percentage als je meer ruimte wilt voor de kalender */
+    overflow: hidden;
   }
   #calendar {
     width: 100%;
-    height: 100%;
+    height: 100%;  /* Laat het element de volledige hoogte van de container benutten */
+    margin-bottom: 20px;
   }
-  /* Styling voor de werkbon-kaarten in de unscheduled container */
+  /* Weekoverzicht per Werknemer */
+  #employee-week-overview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    height: 30%; /* Zorgt ervoor dat het weekoverzicht de resterende ruimte benut */
+    overflow-y: auto;
+  }
+  .employee-card {
+    flex: 0 0 30%;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+  }
+  .employee-card h4 {
+    margin: 0 0 10px 0;
+    font-size: 1.1em;
+  }
+  /* Styling voor werkbon-kaarten in de unscheduled container */
   .werkbon-kaart {
     background-color: #f9f9f9;
     border: 1px solid #ddd;
@@ -37,21 +91,22 @@
 </style>
 
 <div class="planboard-container">
-  <!-- Sidebar: Medewerker selectie, nieuwe activiteit en externe werkbonnen -->
-  <div id="sidebar">
+  <!-- Sidebar: Medewerkerselectie en externe werkbonnen -->
+  <aside id="sidebar">
     <div id="sidebar-header">
-      <!-- Nieuwe knop voor extra activiteiten -->
       <button id="new-activity-btn">Nieuwe Activiteit</button>
       <h3>Medewerker selectie</h3>
       <select id="employee-select">
         <option value="alle">Alle medewerkers</option>
         {% for werknemer in werknemers %}
-          <option value="{{ werknemer.id }}">{{ werknemer.naam }}</option>
+          <option value="{{ werknemer.id }}">
+            {{ werknemer.voornaam }} {{ werknemer.achternaam }}
+          </option>
         {% endfor %}
       </select>
       <button id="add-workorder">Nieuwe werkbon toevoegen</button>
     </div>
-    <div id="unscheduled-container">
+    <section id="unscheduled-container">
       <h2>Niet ingeplande werkbonnen</h2>
       <div id="external-events">
         {% for wb in unscheduled_workbonnen %}
@@ -64,21 +119,38 @@
             {% endif %}
           </div>
         {% empty %}
-          <p>Geen werkbonnen</p>
+          <p>Geen werkbonnen beschikbaar.</p>
         {% endfor %}
       </div>
-    </div>
-  </div>
+    </section>
+  </aside>
 
-  <!-- Kalender Container -->
-  <div id="calendar-container">
-    <div id="calendar"></div>
+  <!-- Hoofdcontent: Kalender en weekoverzicht -->
+  <div id="main-content">
+    <!-- Kalender Container -->
+    <div id="calendar-container">
+      <div id="calendar"></div>
+    </div>
+    <!-- Weekoverzicht per Werknemer -->
+    <section id="employee-week-overview">
+      {% for employee in employees %}
+        <div class="employee-card">
+          <h4>{{ employee.voornaam }} {{ employee.achternaam }}</h4>
+          {% with weekData=overview|get_item:employee.id %}
+            {% if weekData %}
+              <p>Aantal werkbonnen deze week: {{ weekData.weekly_total }}</p>
+            {% else %}
+              <p>Geen data</p>
+            {% endif %}
+          {% endwith %}
+        </div>
+      {% endfor %}
+    </section>
   </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<!-- Laad FullCalendar en Scheduler CSS/JS -->
 <link href="{% static 'fullcalendar_scheduler/resource-timegrid.min.css' %}" rel="stylesheet">
 <script src="{% static 'fullcalendar/js/main.min.js' %}"></script>
 <script src="{% static 'fullcalendar/js/interaction.global.min.js' %}"></script>

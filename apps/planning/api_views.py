@@ -4,6 +4,32 @@ from datetime import datetime
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from apps.planning.models import Werkbon
+from django.http import JsonResponse
+
+def api_resources(request):
+    # Zorg dat deze view een lijst met resources (bijvoorbeeld werknemers) teruggeeft
+    from apps.hr.werknemers.models import Werknemer
+    werknemers = Werknemer.objects.all()
+    data = [{
+        'id': w.id,
+        'title': f"{w.voornaam} {w.achternaam}"
+    } for w in werknemers]
+    return JsonResponse(data, safe=False)
+
+def api_werkbonnen(request):
+    start = request.GET.get('start')
+    end = request.GET.get('end')
+    if start and end:
+        werkbonnen = Werkbon.objects.filter(aanmaakdatum__gte=start, aanmaakdatum__lte=end)
+    else:
+        werkbonnen = Werkbon.objects.all()
+    data = [{
+        'id': wb.id,
+        'title': wb.werkbonnummer,
+        'start': wb.aanvang_werkzaamheden.isoformat() if wb.aanvang_werkzaamheden else None,
+        # Voeg extra velden toe als dat nodig is
+    } for wb in werkbonnen]
+    return JsonResponse(data, safe=False)
 
 def werkbon_list(request):
     """

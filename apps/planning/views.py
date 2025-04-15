@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.db.models import Count
+from django.db.models.functions import TruncDay, TruncWeek, TruncMonth
 from apps.planning.models import Werkbon, Opdrachtgever
 from apps.klanten.models import Klant
 from apps.hr.werknemers.models import Werknemer  # Zorg dat dit correct wordt geïmporteerd
@@ -103,3 +105,76 @@ def index(request):
     from django.http import HttpResponse
     return HttpResponse('Welkom bij de planning app!')
 
+def employee_overview(request):
+    """
+    Geeft een overzicht van de werkbonnen, zowel globaal als per werknemer,
+    gegroepeerd naar dag, week en maand.
+    """
+    # Globaal overzicht over alle werkbonnen die een starttijd hebben
+    global_daily = (
+        Werkbon.objects.filter(aanvang_werkzaamheden__isnull=False)
+        .annotate(day=TruncDay('aanvang_werkzaamheden'))
+        .values('day')
+        .annotate(count=Count('id'))
+        .order_by('day')
+    )
+    global_weekly = (
+        Werkbon.objects.filter(aanvang_werkzaamheden__isnull=False)
+        .annotate(week=TruncWeek('aanvang_werkzaamheden'))
+        .values('week')
+        .annotate(count=Count('id'))
+        .order_by('week')
+    )
+    global_monthly = (
+        Werkbon.objects.filter(aanvang_werkzaamheden__isnull=False)
+        .annotate(month=TruncMonth('aanvang_werkzaamheden'))
+        .values('month')
+        .annotate(count=Count('id'))
+        .order_by('month')
+    )
+
+    # Overzicht per werknemer:
+    # Aangezien in de werkbon als 'technicus' de volledige naam wordt opgeslagen,
+    # construeren we de volledige naam uit de velden voornaam en achternaam.
+    employees = Werknemer.objects.all()
+    overview = {}
+    for employee in employees:
+        fullname = f"{employee.voornaam} {employee.achternaam}"
+        daily = (
+            Werkbon.objects.filter(aanvang_werkzaamheden__isnull=False, technicus=fullname)
+            .annotate(day=TruncDay('aanvang_werkzaamheden'))
+            .values('day')
+            .annotate(count=Count('id'))
+            .order_by('day')
+        )
+        weekly = (
+            Werkbon.objects.filter(aanvang_werkzaamheden__isnull=False, technicus=fullname)
+            .annotate(week=TruncWeek('aanvang_werkzaamheden'))
+            .values('week')
+            .annotate(count=Count('id'))
+            .order_by('week')
+        )
+        monthly = (
+            Werkbon.objects.filter(aanvang_werkzaamheden__isnull=False, technicus=fullname)
+            .annotate(month=TruncMonth('aanvang_werkzaamheden'))
+            .values('month')
+            .annotate(count=Count('id'))
+            .order_by('month')
+        )
+        overview[employee.id] = {
+            'fullname': fullname,
+            'daily': list(daily),
+            'weekly': list(weekly),
+            'monthly': list(monthly),
+        }
+
+    context = {
+        'global_daily': list(global_daily),
+        'global_weekly': list(global_weekly),
+        'global_monthly': list(global_monthly),
+        'employees': employees,
+        'overview': overview,
+    }
+    return render(request, 'planning/employee_overview.html', context)
+    
+   

@@ -1,1 +1,69 @@
 /* Standaard CSS voor planning */
+.planboard-container {
+  display: flex;
+  width: 100%;
+  height: calc(100vh - 170px); /* Houd rekening met header en footer */
+}
+#sidebar {
+  flex: 0 0 15%;
+  padding: 10px;
+  border-right: 1px solid #ccc;
+  overflow-y: auto;
+}
+#sidebar-header {
+  margin-bottom: 10px;
+}
+#employee-select {
+  width: 100%;
+  padding: 5px;
+  font-size: 1em;
+}
+#add-workorder {
+  width: 100%;
+  padding: 8px;
+  margin-top: 10px;
+  background-color: #ccc;
+  border: none;
+  cursor: pointer;
+}
+#main-content {
+  flex: 1;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+#calendar-container {
+  flex: 1;
+  overflow: auto;
+}
+#calendar {
+  width: 100%;
+  height: 400px; /* Pas aan indien nodig */
+  margin-bottom: 20px;
+}
+#employee-week-overview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.employee-card {
+  flex: 0 0 30%; /* Pas de breedte aan naar wens */
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 4px;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+}
+.employee-card h4 {
+  margin: 0 0 10px 0;
+  font-size: 1.1em;
+}
+.werkbon-kaart {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  cursor: move;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+}

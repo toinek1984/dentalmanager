@@ -54,7 +54,9 @@
       <select id="employee-select">
         <option value="alle">Alle medewerkers</option>
         {% for werknemer in werknemers %}
-          <option value="{{ werknemer.id }}">{{ werknemer.naam }}</option>
+          <option value="{{ werknemer.id }}">
+            {{ werknemer.voornaam }} {{ werknemer.achternaam }}
+          </option>
         {% endfor %}
       </select>
       <button id="add-workorder">Nieuwe werkbon toevoegen</button>
@@ -73,3 +75,4 @@
 <script src="{% static 'fullcalendar_scheduler/resource-timegrid.min.js' %}"></script>
 <script src="{% static 'js/planboard.js' %}"></script>
 {% endblock %}
+

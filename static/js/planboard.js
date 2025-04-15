@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
             itemSelector: '.fc-event.external-event',
             eventData: function(eventEl) {
                 const id = eventEl.getAttribute('data-id');
-                const title = eventEl.innerHTML;
+                const title = eventEl.innerHTML.trim();
                 const duration = '01:00';
                 console.log("Draggable event data:", id, title, "Duration:", duration);
                 return { id: id, title: title, duration: duration };
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Gebruik eventContent om aangepaste inhoud te tonen (inclusief barcode indien beschikbaar)
         eventContent: function(arg) {
             let html = `<div class="fc-event-title">${arg.event.title}</div>`;
-            if (arg.event.extendedProps.barcode) {
+            if (arg.event.extendedProps && arg.event.extendedProps.barcode) {
                 html += `<div class="fc-event-barcode">Barcode: ${arg.event.extendedProps.barcode}</div>`;
             }
             return { html: html };
@@ -147,11 +147,13 @@ document.addEventListener('DOMContentLoaded', function() {
             if (selected === 'alle') {
                 calendar.setOption('resources', allResources);
             } else {
-                const filtered = allResources.filter(resource => resource.id == selected);
+                const filtered = allResources.filter(resource => Number(resource.id) === Number(selected));
                 calendar.setOption('resources', filtered);
             }
             calendar.refetchEvents();
         });
+    } else {
+        console.error("Employee select element not found.");
     }
 
     // Handler voor "Nieuwe werkbon toevoegen"
@@ -160,6 +162,8 @@ document.addEventListener('DOMContentLoaded', function() {
         addWorkorderButton.addEventListener('click', function() {
             window.location.href = '/planning/aanmaken/';
         });
+    } else {
+        console.error("Add workorder button not found.");
     }
 
     // Handler voor "Nieuwe Activiteit" met server-opslag
@@ -183,14 +187,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             const selectedActivity = activityTypes[index];
             
-            // Forceer de starttijd op 09:00 lokale tijd ("9000")
+            // Stel de starttijd in op 09:00 lokale tijd
             let newStart = new Date();
             newStart.setHours(9, 0, 0, 0);
             const start = newStart.toISOString();
 
             let defaultResource = (allResources.length > 0) ? allResources[0] : null;
             if (!defaultResource) {
-                alert("Geen medewerker (behandelaar) beschikbaar. Voeg eerst een medewerker toe.");
+                alert("Geen medewerker (resource) beschikbaar. Voeg eerst een resource toe.");
                 return;
             }
             let defaultResourceName = defaultResource.title;
@@ -224,5 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert("Fout bij het aanmaken van de werkbon.");
             });
         });
+    } else {
+        console.error("New activity button not found.");
     }
 });
