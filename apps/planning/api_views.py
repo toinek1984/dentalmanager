@@ -3,38 +3,57 @@ import random
 from datetime import datetime
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
 from apps.planning.models import Werkbon
-from django.http import JsonResponse
+from dateutil import parser
+# Zorg dat hier geen dubbele import van JsonResponse gebeurt
 
 def api_resources(request):
-    # Zorg dat deze view een lijst met resources (bijvoorbeeld werknemers) teruggeeft
-    from apps.hr.werknemers.models import Werknemer
-    werknemers = Werknemer.objects.all()
-    data = [{
-        'id': w.id,
-        'title': f"{w.voornaam} {w.achternaam}"
-    } for w in werknemers]
-    return JsonResponse(data, safe=False)
+    """
+    Retourneert een JSON-lijst met de opties voor behandelaars (resources).
+    Deze lijst komt overeen met de BEHANDELAAR_CHOICES in het model.
+    """
+    choices = [
+        {'id': 'Jellie', 'title': 'Jellie'},
+        {'id': 'Romy', 'title': 'Romy'},
+        {'id': 'Sabrina', 'title': 'Sabrina'},
+        {'id': 'Ellen', 'title': 'Ellen'},
+        {'id': 'Usman', 'title': 'Usman'},
+        {'id': 'Job', 'title': 'Job'},
+        {'id': 'Myrthe', 'title': 'Myrthe'},
+    ]
+    return JsonResponse(choices, safe=False)
 
-def api_werkbonnen(request):
-    start = request.GET.get('start')
-    end = request.GET.get('end')
-    if start and end:
-        werkbonnen = Werkbon.objects.filter(aanmaakdatum__gte=start, aanmaakdatum__lte=end)
-    else:
-        werkbonnen = Werkbon.objects.all()
-    data = [{
-        'id': wb.id,
-        'title': wb.werkbonnummer,
-        'start': wb.aanvang_werkzaamheden.isoformat() if wb.aanvang_werkzaamheden else None,
-        # Voeg extra velden toe als dat nodig is
-    } for wb in werkbonnen]
-    return JsonResponse(data, safe=False)
-
+# def api_werkbonnen(request):
+    # start = request.GET.get('start')
+    # end = request.GET.get('end')
+    # if start and end:
+        # try:
+            # Gebruik fuzzy=True zodat overtollige componenten genegeerd worden
+            # start_date = parser.parse(start, fuzzy=True).date()
+            # end_date = parser.parse(end, fuzzy=True).date()
+        # except Exception as e:
+            # return HttpResponseBadRequest("Invalid date format: " + str(e))
+        # werkbonnen = Werkbon.objects.filter(
+            # aanmaakdatum__gte=start_date,
+            # aanmaakdatum__lte=end_date,
+            # status__in=['open', 'gepland']
+        # )
+    # else:
+        # werkbonnen = Werkbon.objects.filter(status__in=['open', 'gepland'])
+    # data = [{
+        # 'id': wb.id,
+        # 'title': wb.werkbonnummer,
+        # 'start': wb.aanvang_werkzaamheden.isoformat() if wb.aanvang_werkzaamheden else None,
+        # 'status': wb.status,
+        # 'barcode': wb.barcode,
+    # } for wb in werkbonnen]
+    # return JsonResponse(data, safe=False)
+    
+    
 def werkbon_list(request):
     """
-    Retourneert een JSON-lijst van werkbonnen.
-    Het veld 'resourceId' bevat de opgeslagen behandelaar-naam en we voegen 'barcode' toe.
+    Retourneert een JSON-lijst van werkbonnen inclusief velden zoals resourceId (behandelaar-naam), barcode en status.
     """
     werkbonnen = Werkbon.objects.all()
     data = []
@@ -46,21 +65,19 @@ def werkbon_list(request):
             'title': wb.werkbonnummer,
             'start': start_str,
             'resourceId': resource_val,
-            'barcode': wb.barcode,    # Voeg barcode toe
+            'barcode': wb.barcode,    # Barcode toegevoegd
             'status': wb.status,
         })
     return JsonResponse(data, safe=False)
 
-
 @csrf_exempt
 def update_werkbon(request, pk):
     """
-    Update de 'aanvang_werkzaamheden' en 'behandelaar' van een werkbon.
+    Update de 'aanvang_werkzaamheden' en de behandelaar van een werkbon.
     Verwacht JSON met:
       - start: ISO datetime-string
       - resource: Naam van de behandelaar (string)
     """
-    from django.shortcuts import get_object_or_404
     wb = get_object_or_404(Werkbon, pk=pk)
     if request.method == "POST":
         try:
@@ -72,6 +89,7 @@ def update_werkbon(request, pk):
             if not resource:
                 return HttpResponseBadRequest("Missing field: resource")
             try:
+                # Zorg ervoor dat het formaat correct is
                 new_start = datetime.fromisoformat(new_start_str.replace("Z", ""))
             except Exception as conv_error:
                 return HttpResponseBadRequest("Invalid start datetime format: " + str(conv_error))
@@ -89,10 +107,9 @@ def create_werkbon(request):
     API endpoint om een nieuwe werkbon aan te maken.
     Verwacht een JSON payload met:
       - title: Titel van de werkbon (string)
-      - start: ISO datetime-string (bijv. "2025-03-24T10:00:00")
-      - resource: Naam van de behandelaar (string, bv. "Jellie")
-    
-    Om UNIQUE constraint problemen te voorkomen, voegen we een random nummer toe.
+      - start: ISO datetime-string
+      - resource: Naam van de behandelaar (string)
+    Voeg een random nummer toe om te zorgen voor een uniek werkbonnummer.
     """
     if request.method == "POST":
         try:
@@ -111,7 +128,6 @@ def create_werkbon(request):
                 start = datetime.fromisoformat(start_str.replace("Z", ""))
             except Exception as conv_error:
                 return HttpResponseBadRequest("Invalid start datetime format: " + str(conv_error))
-            # Maak een uniek werkbonnummer door een random getal toe te voegen
             unique_title = f"{title}_{random.randint(1000, 9999)}"
             wb = Werkbon.objects.create(
                 werkbonnummer=unique_title,
@@ -125,23 +141,3 @@ def create_werkbon(request):
             print("Exception in create_werkbon:", e)
             return HttpResponseBadRequest(str(e))
     return HttpResponseBadRequest("Invalid method.")
-
-
-
-def api_resources(request):
-    """
-    Retourneert een JSON-lijst met de opties voor behandelaars (resources).
-    Deze lijst komt overeen met de BEHANDELAAR_CHOICES in het model.
-    """
-    # Definieer de opties zoals in je modelkeuzes
-    choices = [
-        {'id': 'Jellie', 'title': 'Jellie'},
-        {'id': 'Romy', 'title': 'Romy'},
-        {'id': 'Sabrina', 'title': 'Sabrina'},
-        {'id': 'Ellen', 'title': 'Ellen'},
-        {'id': 'Usman', 'title': 'Usman'},
-        {'id': 'Job', 'title': 'Job'},
-        {'id': 'Myrthe', 'title': 'Myrthe'}, 
-    ]
-    
-    return JsonResponse(choices, safe=False)
