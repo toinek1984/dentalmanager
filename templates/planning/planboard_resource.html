@@ -2,6 +2,10 @@
 {% load static %}
 {% block title %}Planboard Resource View{% endblock %}
 
+{% block extra_css %}
+<link href="{% static 'css/planboard.css' %}" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
 <style>
   .planboard-container {
@@ -11,45 +15,46 @@
   }
   /* Sidebar styling */
   #sidebar {
-    flex: 0 0 15%;
-    padding: 10px;
+    flex: 0 0 20%;
+    padding: 1rem;
     border-right: 1px solid #ccc;
     overflow-y: auto;
   }
   #sidebar-header {
-    margin-bottom: 10px;
+    margin-bottom: 1rem;
   }
-  #employee-select {
-    width: 100%;
-    padding: 5px;
-    font-size: 1em;
-  }
+  #employee-select,
   #add-workorder {
     width: 100%;
-    padding: 8px;
-    margin-top: 10px;
-    background-color: #ccc;
-    border: none;
-    cursor: pointer;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+  /* Styling unscheduled events */
+  .werkbon-kaart {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    cursor: move;
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
   }
   /* Kalender container */
   #calendar-container {
     flex: 1;
-    padding: 10px;
+    padding: 1rem;
     overflow: hidden;
   }
   #calendar {
     width: 100%;
     height: 100%;
   }
-  /* Extra styling voor tijdslots */
-  .fc-timegrid-slot {
-    height: 60px !important;
-  }
 </style>
 
 <div class="planboard-container">
-  <div id="sidebar">
+  <!-- Sidebar: medewerker-selectie + unscheduled events -->
+  <aside id="sidebar">
     <div id="sidebar-header">
       <select id="employee-select">
         <option value="alle">Alle medewerkers</option>
@@ -61,7 +66,27 @@
       </select>
       <button id="add-workorder">Nieuwe werkbon toevoegen</button>
     </div>
-  </div>
+
+    <section id="unscheduled-container">
+      <h4>Niet ingeplande werkbonnen</h4>
+      <div id="external-events">
+        {% for wb in unscheduled_workbonnen %}
+          <div class="fc-event external-event werkbon-kaart" data-id="{{ wb.pk }}" draggable="true">
+            <strong>{{ wb.werkbonnummer }}</strong><br>
+            {% if wb.klant %}
+              <em>{{ wb.klant.naam }}</em>
+            {% else %}
+              <span>Geen klant</span>
+            {% endif %}
+          </div>
+        {% empty %}
+          <p>Geen werkbonnen beschikbaar.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </aside>
+
+  <!-- Kalender -->
   <div id="calendar-container">
     <div id="calendar"></div>
   </div>
@@ -75,4 +100,5 @@
 <script src="{% static 'fullcalendar_scheduler/resource-timegrid.min.js' %}"></script>
 <script src="{% static 'js/planboard.js' %}"></script>
 {% endblock %}
+
 

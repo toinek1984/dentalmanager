@@ -1,234 +1,195 @@
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("Planboard loaded.");
+  console.log("Planboard loaded.");
 
-    // CSRF-token ophalen
-    const csrfTokenElem = document.querySelector('[name=csrfmiddlewaretoken]');
-    const csrfToken = csrfTokenElem ? csrfTokenElem.value : '';
+  // 1) Grab CSRF token
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
 
-    let allResources = [];
-
-    // Externe events draggable maken
-    const externalEventsContainer = document.getElementById('external-events');
-    if (externalEventsContainer) {
-        new FullCalendar.Draggable(externalEventsContainer, {
-            itemSelector: '.fc-event.external-event',
-            eventData: function(eventEl) {
-                const id = eventEl.getAttribute('data-id');
-                const title = eventEl.innerHTML.trim();
-                const duration = '01:00';
-                console.log("Draggable event data:", id, title, "Duration:", duration);
-                return { id: id, title: title, duration: duration };
-            },
-            removeOnDrop: true
-        });
-        console.log("External events are now draggable with removeOnDrop enabled.");
-    } else {
-        console.error("External events container not found.");
-    }
-
-    // Kalender initialiseren
-    const calendarEl = document.getElementById('calendar');
-    if (!calendarEl) {
-        console.error("Calendar element not found.");
-        return;
-    }
-
-    const calendar = new FullCalendar.Calendar(calendarEl, {
-        schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
-        initialView: 'resourceTimeGridWeek',
-        locale: 'nl',
-        height: '100%',
-        editable: true,
-        droppable: true,
-        eventResizableFromStart: true,
-        defaultTimedEventDuration: '01:00:00',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'resourceTimeGridWeek,dayGridMonth,resourceTimeGridDay'
-        },
-        slotMinTime: '08:00:00',
-        slotMaxTime: '18:00:00',
-        slotDuration: '00:30:00',
-        resources: '/planning/api/resources/',
-        events: '/planning/api/werkbonnen/',
-        // Gebruik eventContent om aangepaste inhoud te tonen (inclusief barcode indien beschikbaar)
-        eventContent: function(arg) {
-            let html = `<div class="fc-event-title">${arg.event.title}</div>`;
-            if (arg.event.extendedProps && arg.event.extendedProps.barcode) {
-                html += `<div class="fc-event-barcode">Barcode: ${arg.event.extendedProps.barcode}</div>`;
-            }
-            return { html: html };
-        },
-        eventReceive: function(info) {
-            console.log("External event received:", info.event.id);
-            if (info.draggedEl) {
-                info.draggedEl.remove();
-            } else {
-                const extContainer = document.getElementById('external-events');
-                if (extContainer) {
-                    const child = extContainer.querySelector(`[data-id="${info.event.id}"]`);
-                    if (child) { child.remove(); }
-                }
-            }
-        },
-        eventDrop: function(info) {
-            console.log("Event dropped:", info.event.id, "New start:", info.event.start.toISOString());
-            const eventId = info.event.id;
-            if (isNaN(Number(eventId))) {
-                console.log("Tijdelijk event gedropt; lokaal bijgewerkt, geen server-update.");
-                calendar.refetchEvents();
-                return;
-            }
-            const resources = info.event.getResources();
-            const resource = resources.length > 0 ? resources[0] : null;
-            if (!resource) {
-                console.warn("Geen resource gevonden, drop wordt teruggedraaid.");
-                info.revert();
-                return;
-            }
-            fetch(`/planning/api/werkbonnen/${eventId}/update/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({
-                    'start': info.event.start.toISOString(),
-                    'resource': resource.title
-                })
-            })
-            .then(response => {
-                console.log("Response status (update):", response.status);
-                if (!response.ok) {
-                    return response.text().then(text => { throw new Error(text); });
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log("Server response (update):", data);
-                if (data.status !== 'success') {
-                    let errorMsg = data.message || "Onbekende fout";
-                    alert("Error: " + errorMsg);
-                    info.revert();
-                } else {
-                    console.log("Event succesvol geüpdatet.");
-                    calendar.refetchEvents();
-                }
-            })
-            .catch(error => {
-                console.error("Fout bij updaten event:", error);
-                alert("Fout bij updaten event. Wijzigingen niet opgeslagen.");
-                info.revert();
-            });
-        },
-        eventClick: function(info) {
-            // Doorsturen naar de detailpagina (waar je de volledige werkbon, inclusief barcode, ziet)
-            window.location.href = `/planning/werkbon_overzicht/${info.event.id}/`;
-        }
+  // 2) Make external events draggable
+  const externalEl = document.getElementById('external-events');
+  if (externalEl) {
+    new FullCalendar.Draggable(externalEl, {
+      itemSelector: '.fc-event.external-event',
+      eventData(eventEl) {
+        return {
+          id: eventEl.dataset.id,
+          title: eventEl.textContent.trim(),
+          duration: '01:00'
+        };
+      },
+      removeOnDrop: true
     });
-    
-    calendar.render();
+    console.log("External events draggable ready.");
+  } else {
+    console.warn("No external-events container found.");
+  }
 
-    // Resources ophalen
-    fetch('/planning/api/resources/')
-        .then(response => response.json())
-        .then(data => {
-            console.log("Fetched resources:", data);
-            allResources = data;
+  // 3) Find and validate the calendar element
+  const calendarEl = document.getElementById('calendar');
+  if (!calendarEl) {
+    console.error("Calendar element not found.");
+    return;
+  }
+
+  // 4) Initialize FullCalendar
+  const calendar = new FullCalendar.Calendar(calendarEl, {
+    schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
+    initialView: 'resourceTimeGridWeek',
+    locale: 'nl',
+    height: '100%',
+    editable: true,
+    droppable: true,
+    eventResourceEditable: true,      // ← allow dragging between resources
+    eventResizableFromStart: true,
+    defaultTimedEventDuration: '01:00:00',
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'resourceTimeGridWeek,dayGridMonth,resourceTimeGridDay'
+    },
+    slotMinTime: '07:00:00',
+    slotMaxTime: '18:00:00',
+    slotDuration: '00:30:00',
+    resources: '/planning/api/resources/',
+    events: '/planning/api/werkbonnen/',
+
+    // Custom content: show title, client & barcode
+    eventContent(arg) {
+      let html = `<div class="fc-event-title">${arg.event.title}</div>`;
+      if (arg.event.extendedProps.client) {
+        html += `<div class="fc-event-client">Klant: ${arg.event.extendedProps.client}</div>`;
+      }
+      if (arg.event.extendedProps.barcode) {
+        html += `<div class="fc-event-barcode">Barcode: ${arg.event.extendedProps.barcode}</div>`;
+      }
+      return { html };
+    },
+
+    // Dropped from external list
+    eventReceive(info) {
+      console.log("External event received:", info.event.id);
+      info.draggedEl?.remove();
+    },
+
+    // Moved inside the calendar
+    eventDrop(info) {
+      console.log("Event dropped:", info.event.id, "New start:", info.event.start.toISOString());
+
+      const eventId = Number(info.event.id);
+      if (isNaN(eventId)) {
+        console.log("Temporary event, only local.");
+        calendar.refetchEvents();
+        return;
+      }
+
+      const resources = info.event.getResources();
+      if (!resources.length) {
+        console.warn("No resource found, reverting.");
+        info.revert();
+        return;
+      }
+      const resourceId = resources[0].id;
+
+      fetch(`/planning/api/werkbonnen/${eventId}/update/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+          start: info.event.start.toISOString(),
+          resourceId: resourceId
         })
-        .catch(error => console.error("Error fetching resources:", error));
+      })
+      .then(res => {
+        if (!res.ok) return res.text().then(txt => Promise.reject(txt));
+        return res.json();
+      })
+      .then(data => {
+        if (data.status !== 'ok') {
+          return Promise.reject(data.message || "Unknown update error");
+        }
+        console.log("Update succeeded:", data);
+        calendar.refetchEvents();
+      })
+      .catch(err => {
+        console.error("Update failed:", err);
+        alert("Kon werkbon niet updaten. Wijziging wordt teruggedraaid.");
+        info.revert();
+      });
+    },
 
-    // Filteren op medewerker
-    const employeeSelect = document.getElementById('employee-select');
-    if (employeeSelect) {
-        employeeSelect.addEventListener('change', function() {
-            const selected = this.value;
-            if (selected === 'alle') {
-                calendar.setOption('resources', allResources);
-            } else {
-                const filtered = allResources.filter(resource => Number(resource.id) === Number(selected));
-                calendar.setOption('resources', filtered);
-            }
-            calendar.refetchEvents();
-        });
-    } else {
-        console.error("Employee select element not found.");
+    // Click → go to detail page
+    eventClick(info) {
+      window.location.href = `/planning/werkbon_overzicht/${info.event.id}/`;
     }
+  });
 
-    // Handler voor "Nieuwe werkbon toevoegen"
-    const addWorkorderButton = document.getElementById('add-workorder');
-    if (addWorkorderButton) {
-        addWorkorderButton.addEventListener('click', function() {
-            window.location.href = '/planning/aanmaken/';
-        });
-    } else {
-        console.error("Add workorder button not found.");
-    }
+  calendar.render();
 
-    // Handler voor "Nieuwe Activiteit" met server-opslag
-    const newActivityBtn = document.getElementById('new-activity-btn');
-    if (newActivityBtn) {
-        newActivityBtn.addEventListener('click', function() {
-            const activityTypes = [
-                { id: 'route', title: 'Route rijden' },
-                { id: 'snipper', title: 'Snippermiddag' },
-                { id: 'vrij', title: 'Vrije dag' }
-            ];
-            let message = "Selecteer een activiteit:\n";
-            activityTypes.forEach((act, index) => {
-                message += `${index + 1}. ${act.title}\n`;
-            });
-            const choice = prompt(message);
-            const index = parseInt(choice) - 1;
-            if (isNaN(index) || index < 0 || index >= activityTypes.length) {
-                alert("Ongeldige keuze.");
-                return;
-            }
-            const selectedActivity = activityTypes[index];
-            
-            // Stel de starttijd in op 09:00 lokale tijd
-            let newStart = new Date();
-            newStart.setHours(9, 0, 0, 0);
-            const start = newStart.toISOString();
+  // 5) Load & cache resources so the filter can work
+  let allResources = [];
+  fetch('/planning/api/resources/')
+    .then(r => r.json())
+    .then(data => {
+      allResources = data;
+      console.log("Resources loaded:", allResources);
+    })
+    .catch(err => console.error("Error fetching resources:", err));
 
-            let defaultResource = (allResources.length > 0) ? allResources[0] : null;
-            if (!defaultResource) {
-                alert("Geen medewerker (resource) beschikbaar. Voeg eerst een resource toe.");
-                return;
-            }
-            let defaultResourceName = defaultResource.title;
+  // 6) Wire up the employee‑filter dropdown
+  const employeeSelect = document.getElementById('employee-select');
+  if (employeeSelect) {
+    employeeSelect.addEventListener('change', () => {
+      const val = employeeSelect.value;
+      if (val === 'alle') {
+        calendar.setOption('resources', allResources);
+      } else {
+        calendar.setOption(
+          'resources',
+          allResources.filter(r => String(r.id) === val)
+        );
+      }
+      calendar.refetchEvents();
+    });
+  }
 
-            // Verstuur de nieuwe activiteit naar de server
-            fetch('/planning/api/werkbonnen/create/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({
-                    title: selectedActivity.title,
-                    start: start,
-                    resource: defaultResourceName
-                })
-            })
-            .then(response => {
-                console.log("Response status (create):", response.status);
-                if (!response.ok) {
-                    return response.text().then(text => { throw new Error(text); });
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log("Werkbon aangemaakt:", data);
-                calendar.refetchEvents();
-            })
-            .catch(error => {
-                console.error("Fout bij het aanmaken van werkbon:", error);
-                alert("Fout bij het aanmaken van de werkbon.");
-            });
-        });
-    } else {
-        console.error("New activity button not found.");
-    }
+  // 7) “Nieuwe werkbon” button
+  document.getElementById('add-workorder')?.addEventListener('click', () => {
+    window.location.href = '/planning/aanmaken/';
+  });
+
+  // 8) “Nieuwe Activiteit” button
+  document.getElementById('new-activity-btn')?.addEventListener('click', () => {
+    const types = [
+      { id: 'route', title: 'Route rijden' },
+      { id: 'snipper', title: 'Snippermiddag' },
+      { id: 'vrij', title: 'Vrije dag' }
+    ];
+    let msg = "Selecteer activiteit:\n";
+    types.forEach((t, i) => msg += `${i+1}. ${t.title}\n`);
+    const idx = parseInt(prompt(msg),10) - 1;
+    if (isNaN(idx) || !types[idx]) return alert("Ongeldige keuze.");
+
+    const now = new Date();
+    now.setHours(9,0,0,0);
+    const payload = {
+      title: types[idx].title,
+      start: now.toISOString(),
+      resource: allResources[0]?.title || ''
+    };
+
+    fetch('/planning/api/werkbonnen/create/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken
+      },
+      body: JSON.stringify(payload)
+    })
+    .then(r => r.ok ? calendar.refetchEvents() : r.text().then(txt => Promise.reject(txt)))
+    .catch(err => {
+      console.error("Error creating activity:", err);
+      alert("Kan activiteit niet aanmaken.");
+    });
+  });
 });
