@@ -10,7 +10,11 @@ from django.utils import timezone
 from .forms import KlantNotitieForm 
 from django.http import JsonResponse
 from .models import Klant
+from django.contrib.auth.decorators import login_required
 
+@login_required
+def index(request):
+    ...
 
 def search_klant(request):
     """Zoekt klanten op basis van een zoekterm en geeft een JSON-lijst terug."""

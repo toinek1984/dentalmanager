@@ -5,6 +5,11 @@ from datetime import timedelta
 from apps.planning.models import Werkbon
 from .marketing.models import MarketingCampagne
 from .marketing.forms import MarketingCampagneForm
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def index(request):
+    ...
 
 # Algemene dashboard voor de boekhouding module
 def dashboard(request):

@@ -8,6 +8,12 @@ from apps.hr.werknemers.models import Werknemer  # Zorg dat dit correct wordt ge
 from .forms import WerkbonForm
 from django.shortcuts import render, redirect, get_object_or_404
 from apps.planning.models import Werkbon
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def index(request):
+    ...
+
 
 def planboard(request):
     # Jouw bestaande planboard-view (als voorbeeld)

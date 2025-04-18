@@ -9,8 +9,27 @@ SECRET_KEY = 'jouw-geheime-sleutel'  # Vervang dit door een echte, veilige sleut
 DEBUG = True
 ALLOWED_HOSTS = []
 
-LOGIN_REDIRECT_URL = '/'
-LOGIN_URL = '/accounts/login/'
+# waar je LOGIN_URL e.d. zet:
+LOGIN_URL = '/registration/login/'        # jouw login‑pagina
+LOGIN_REDIRECT_URL = '/'                  # na login
+# alle URL‑patronen (regex) die je wél anoniem wilt laten (bovenop LOGIN_URL):
+
+# Alleen deze URL’s mogen zonder sessie bekeken worden:
+LOGIN_EXEMPT_URLS = [
+    # je eigen login/logout views
+    r'^registration/login/?$',
+    r'^registration/logout/?$',
+
+    # Django’s admin login — de rest van /admin/ blijft beveiligd
+    r'^admin/login/?$',
+
+    # static en media
+    r'^static/.*$',
+    r'^media/.*$',
+    r'^accounts/.*$',                # als je django.contrib.auth.urls gebruikt
+]
+
+
 
 # Static- en media-instellingen
 STATIC_URL = '/static/'
@@ -51,7 +70,7 @@ INSTALLED_APPS = [
     'apps.boekhouding.crediteuren',
     'apps.boekhouding.debiteuren',
     'apps.boekhouding.facturatie',
-
+    'apps.core', 
 
     'apps.wagenpark',
     'apps.klanten',
@@ -76,8 +95,11 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'apps.core.middleware.LoginRequiredMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'dentalmanager.middleware.LoginRequiredMiddleware',
+    
 ]
 
 # Root URL-conf

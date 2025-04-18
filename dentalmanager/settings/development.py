@@ -3,6 +3,26 @@ from .base import *  # ✅ Dit zorgt ervoor dat alle basisinstellingen worden ge
 import os
 DEBUG = True
 
+# waar je LOGIN_URL e.d. zet:
+LOGIN_URL = '/registration/login/'        # jouw login‑pagina
+LOGIN_REDIRECT_URL = '/'                  # na login
+# alle URL‑patronen (regex) die je wél anoniem wilt laten (bovenop LOGIN_URL):
+
+# Alleen deze URL’s mogen zonder sessie bekeken worden:
+LOGIN_EXEMPT_URLS = [
+    # je eigen login/logout views
+    r'^registration/login/?$',
+    r'^registration/logout/?$',
+
+    # Django’s admin login — de rest van /admin/ blijft beveiligd
+    r'^admin/login/?$',
+
+    # static en media
+    r'^static/.*$',
+    r'^media/.*$',
+]
+
+
 # Installed apps: Django apps, derde-partij apps en eigen apps
 INSTALLED_APPS = [
     # Django eigen apps
@@ -42,4 +62,17 @@ INSTALLED_APPS = [
     'apps.magazijn',
     'apps.beheerderspagina',
     'apps.log_in_pagina',
+]
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'apps.core.middleware.LoginRequiredMiddleware',   # <- **hier** toevoegen
+
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
