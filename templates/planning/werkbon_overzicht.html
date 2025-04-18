@@ -45,8 +45,8 @@
       <td>{{ wb.werkbonnummer }}</td>
       <td>
         {% if wb.klant %}
-          <!-- Gebruik de aangepaste URL-omkering: let op de namespace en viewnaam -->
-          <a href="{% url 'klantdossier:dossier_detail' wb.klant.id %}" onclick="event.stopPropagation();">
+          <a href="{% url 'klanten:dossier_detail' wb.klant.id %}"
+             onclick="event.stopPropagation();">
             {{ wb.klant.naam }}
           </a>
         {% else %}
@@ -62,7 +62,10 @@
       </td>
       <td>{{ wb.status }}</td>
       <td>
-        <a href="{% url 'aanmaken_werkbon:edit_werkbon' wb.pk %}" onclick="event.stopPropagation();">Bewerk</a>
+        <a href="{% url 'planning:edit_werkbon' wb.pk %}"
+           onclick="event.stopPropagation();">
+          Bewerk
+        </a>
       </td>
     </tr>
     {% empty %}
@@ -73,3 +76,4 @@
   </tbody>
 </table>
 {% endblock %}
+

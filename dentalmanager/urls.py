@@ -17,7 +17,7 @@ urlpatterns = [
 
     # Specifieke route voor de grootboekrekeningen-submodule
 
-    
+    path('boekhouding/', include('apps.boekhouding.urls')),
     # Andere apps
     path('wagenpark/', include('apps.wagenpark.urls')),
     path('klanten/', include('apps.klanten.urls')),

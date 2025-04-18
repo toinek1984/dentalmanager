@@ -4,11 +4,17 @@
 
 {% block content %}
 <h1>Klantendossiers</h1>
-<a href="{% url 'klanten:dossier_create' %}">Nieuw dossier aanmaken</a>
+
+<!-- Link naar nieuw dossier -->
+<p>
+  <a href="/klanten/dossiers/nieuw/" class="btn btn-primary">Nieuw dossier aanmaken</a>
+</p>
+
 <ul>
     {% for dossier in dossiers %}
         <li>
-            <a href="{% url 'klantdossier:dossier_detail' dossier.klant.id %}" onclick="event.stopPropagation();">
+            <!-- Link naar detailpagina van dit dossier -->
+            <a href="/klanten/dossiers/{{ dossier.klantnummer }}/">
                 {{ dossier.klant.naam }}
             </a>
         </li>

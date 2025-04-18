@@ -6,11 +6,23 @@
 
 <section class="dossier-basic-info">
   <p><strong>Klantnummer:</strong> {{ dossier.klantnummer }}</p>
-  <p><strong>Geboortedatum:</strong> {% if dossier.geboortedatum %}{{ dossier.geboortedatum|date:"d-m-Y" }}{% else %}Niet ingevuld{% endif %}</p>
+  <p><strong>Geboortedatum:</strong>
+    {% if dossier.geboortedatum %}
+      {{ dossier.geboortedatum|date:"d-m-Y" }}
+    {% else %}
+      Niet ingevuld
+    {% endif %}
+  </p>
   <p><strong>Adres:</strong> {{ dossier.straat }} {{ dossier.huisnummer }}, {{ dossier.postcode }} {{ dossier.woonplaats }}</p>
   <p><strong>Telefoon:</strong> {{ dossier.telefoonnummer }}</p>
   <p><strong>Email:</strong> {{ dossier.emailadres }}</p>
-  <p><strong>Zorginstelling:</strong> {% if dossier.zorginstelling %}{{ dossier.zorginstelling }}{% else %}Niet van toepassing{% endif %}</p>
+  <p><strong>Zorginstelling:</strong>
+    {% if dossier.zorginstelling %}
+      {{ dossier.zorginstelling }}
+    {% else %}
+      Niet van toepassing
+    {% endif %}
+  </p>
 </section>
 
 <section class="dossier-extra-info">
@@ -25,7 +37,6 @@
   <p><strong>Verzekeringsnummer:</strong> {{ dossier.verzekeringsnummer }}</p>
 </section>
 
-<!-- Notities sectie met inline formulier -->
 <section class="dossier-notities">
   <h2>Notities</h2>
   {% if dossier.notities.all %}
@@ -39,8 +50,7 @@
   {% else %}
     <p>Er zijn nog geen notities toegevoegd.</p>
   {% endif %}
-  
-  <!-- Inline notitieformulier -->
+
   <h3>Voeg direct een nieuwe notitie toe</h3>
   <form method="post">
     {% csrf_token %}
@@ -49,24 +59,25 @@
   </form>
 </section>
 
-<!-- Acties sectie met knoppen -->
 <section class="dossier-actions">
   <h2>Acties</h2>
   <div>
+    <!-- Bewerk dossier -->
     <button type="button" class="btn btn-info"
-      onclick="location.href='{% url 'klanten:dossier_edit' dossier.klantnummer %}'">
+      onclick="location.href='/klanten/dossiers/{{ dossier.klantnummer }}/bewerken/'">
       Bewerk Dossier
     </button>
   </div>
   <div>
+    <!-- Open werkbonformulier, meegeven dossiernummer -->
     <button type="button" class="btn btn-primary"
       onclick="location.href='/planning/aanmaken/?dossier={{ dossier.klantnummer }}'">
       Open Werkbon Formulier
     </button>
   </div>
   <div>
-    <!-- Voor de Overleden-knop gebruiken we een formulier omdat dit een POST-request vereist -->
-    <form action="{% url 'klanten:mark_overleden' dossier.klantnummer %}" method="post" style="display:inline;">
+    <!-- Markeer als overleden -->
+    <form action="/klanten/dossiers/{{ dossier.klantnummer }}/overleden/" method="post" style="display:inline;">
       {% csrf_token %}
       <button type="submit" class="btn btn-warning">
         Markeer als Overleden
@@ -80,7 +91,7 @@
   {% if dossier.werkbon_geschiedenis %}
     <ul>
       {% for wb in dossier.werkbon_geschiedenis %}
-        <li>Werkbon ID: {{ wb.werkbon_id }} - Datum: {{ wb.datum }} - Status: {{ wb.status }}</li>
+        <li>Werkbon ID: {{ wb.werkbon_id }} – Datum: {{ wb.datum }} – Status: {{ wb.status }}</li>
       {% endfor %}
     </ul>
   {% else %}
@@ -91,7 +102,7 @@
   {% if dossier.factuur_geschiedenis %}
     <ul>
       {% for factuur in dossier.factuur_geschiedenis %}
-        <li>Factuur ID: {{ factuur.factuur_id }} - Datum: {{ factuur.datum }} - Bedrag: {{ factuur.bedrag }}</li>
+        <li>Factuur ID: {{ factuur.factuur_id }} – Datum: {{ factuur.datum }} – Bedrag: {{ factuur.bedrag }}</li>
       {% endfor %}
     </ul>
   {% else %}
@@ -101,7 +112,7 @@
 
 <!-- Terug naar lijst knop -->
 <button type="button" class="btn btn-secondary"
-  onclick="location.href='{% url 'klanten:dossier_list' %}'">
+  onclick="location.href='/klanten/dossiers/'">
   Terug naar lijst
 </button>
 {% endblock %}
