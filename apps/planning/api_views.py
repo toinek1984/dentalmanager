@@ -3,35 +3,35 @@
 import json
 import random
 from datetime import datetime
+
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
-from django.utils.dateparse import parse_datetime
+
 from apps.planning.models import Werkbon
+from apps.hr.werknemers.models import Werknemer
 
-
-# apps/planning/api_views.py
 
 def api_resources(request):
-    from apps.hr.werknemers.models import Werknemer
+    """
+    Retourneert de lijst van medewerkers als resources.
+    resource.id én resource.title zijn hier beide de naam-string.
+    """
+    medewerkers = Werknemer.objects.all()
     data = [
         {
-          'id': f"{w.voornaam} {w.achternaam}",  # óók a string
-          'title': f"{w.voornaam} {w.achternaam}"
+            'id': f"{m.voornaam} {m.achternaam}",
+            'title': f"{m.voornaam} {m.achternaam}"
         }
-        for w in Werknemer.objects.all()
+        for m in medewerkers
     ]
     return JsonResponse(data, safe=False)
 
 
-
 def werkbon_list(request):
     """
-    Retourneert álle werkbonnen binnen eventuele start/end params,
-    inclusief klantnaam en barcode.
-    resourceId is de exacte string uit wb.behandelaar,
-    zodat FullCalendar hem kan matchen aan een resource.id = dezelfde string.
+    Retourneert alle Werkbonnen in de gevraagde periode (indien meegegeven),
+    inclusief klantnaam, barcode en resourceId = behandelaar-string.
     """
     start = request.GET.get('start')
     end   = request.GET.get('end')
@@ -39,7 +39,6 @@ def werkbon_list(request):
 
     if start and end:
         try:
-            # strip trailing Z en parse
             sd = datetime.fromisoformat(start.rstrip('Z'))
             ed = datetime.fromisoformat(end.rstrip('Z'))
             qs = qs.filter(
@@ -47,7 +46,7 @@ def werkbon_list(request):
                 aanvang_werkzaamheden__lte=ed
             )
         except ValueError:
-            # laat alle werkbonnen zien als parse faalt
+            # bij parse-fout: toon gewoon alles
             pass
 
     events = []
@@ -56,52 +55,85 @@ def werkbon_list(request):
             'id': wb.pk,
             'title': wb.werkbonnummer,
             'start': wb.aanvang_werkzaamheden.isoformat() if wb.aanvang_werkzaamheden else None,
-            'resourceId': wb.behandelaar or None,          # ← string matching your resource.id
+            'resourceId': wb.behandelaar or None,
             'barcode': wb.barcode,
-            'client': wb.klant.naam if wb.klant else None,  # klantnaam erbij
+            'client': wb.klant.naam if wb.klant else None,
         })
-    return JsonResponse(events, safe=False)  
+    return JsonResponse(events, safe=False)
 
 @csrf_exempt
 def werkbon_update(request, pk):
-    if request.method != "POST":
-        return HttpResponseBadRequest("Invalid method.")
-    data = json.loads(request.body)
-    new_start = data.get("start")
-    new_resource = data.get("resourceId")
-    if not new_start or new_resource is None:
-        return HttpResponseBadRequest("Missing start or resourceId")
-    dt = parse_datetime(new_start)
-    if not dt:
-        return HttpResponseBadRequest("Invalid datetime")
-    if timezone.is_naive(dt):
-        dt = timezone.make_aware(dt, timezone.get_current_timezone())
+    if request.method != 'POST':
+        return HttpResponseBadRequest("Invalid method")
 
-    wb = get_object_or_404(Werkbon, pk=pk)
-    wb.aanvang_werkzaamheden = dt
-    wb.resource_id = new_resource
-    wb.save()
-    return JsonResponse({"status":"ok"})
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        new_start_str = data.get('start')
+        new_res_str   = data.get('resourceId')
+        if not new_start_str or not new_res_str:
+            return HttpResponseBadRequest("Missing field: start or resourceId")
 
+        # Parse de nieuwe starttijd (strip Z)
+        try:
+            new_start = datetime.fromisoformat(new_start_str.rstrip('Z'))
+        except ValueError:
+            return HttpResponseBadRequest("Invalid datetime format")
+
+        # Werkbon ophalen en bijwerken
+        wb = get_object_or_404(Werkbon, pk=pk)
+        wb.aanvang_werkzaamheden = new_start
+        wb.behandelaar = new_res_str
+        wb.save()
+
+        # *** Belangrijk: return precies status 'ok' ***
+        return JsonResponse({'status': 'ok'})
+
+    except json.JSONDecodeError:
+        return HttpResponseBadRequest("Invalid JSON")
+    except Exception as e:
+        return HttpResponseBadRequest(str(e))
 
 
 @csrf_exempt
 def api_create_werkbon(request):
-    if request.method != "POST":
-        return HttpResponseBadRequest("Invalid method.")
-    data = json.loads(request.body)
-    start_str = data.get('start')
-    # ...
-    parsed = parse_datetime(start_str)
-    if not parsed:
-        return HttpResponseBadRequest("Invalid datetime format")
-    if timezone.is_naive(parsed):
-        parsed = timezone.make_aware(parsed, timezone.get_current_timezone())
+    """
+    Maakt een nieuwe Werkbon aan.
+    Verwacht JSON:
+      {
+        "title": "Vrije dag",
+        "start": "2025-04-18T09:00:00Z",
+        "resource": "Jellie Janssen"
+      }
+    """
+    if request.method != 'POST':
+        return HttpResponseBadRequest("Invalid method")
 
-    wb = Werkbon.objects.create(
-        werkbonnummer         = unique_title,
-        aanvang_werkzaamheden = parsed,
-        # ...
-    )
-    # ...
+    try:
+        data  = json.loads(request.body.decode('utf-8'))
+        title = data.get('title')
+        start = data.get('start')
+        res   = data.get('resource')
+        if not title or not start or not res:
+            return HttpResponseBadRequest("Missing field: title, start or resource")
 
+        # Parse de start-tijd
+        try:
+            dt = datetime.fromisoformat(start.rstrip('Z'))
+        except ValueError:
+            return HttpResponseBadRequest("Invalid datetime format")
+
+        # Maak uniek werkbonnummer
+        unique_title = f"{title}_{random.randint(1000, 9999)}"
+
+        wb = Werkbon.objects.create(
+            werkbonnummer          = unique_title,
+            aanvang_werkzaamheden = dt,
+            behandelaar           = res,
+            status                = 'open'
+        )
+        return JsonResponse({'status':'success','id': wb.pk})
+
+    except json.JSONDecodeError:
+        return HttpResponseBadRequest("Invalid JSON")
+    except Exception as e:
+        return HttpResponseBadRequest(str(e))
