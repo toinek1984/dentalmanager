@@ -7,7 +7,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # Veiligheids- en redirect-instellingen
 SECRET_KEY = 'jouw-geheime-sleutel'  # Vervang dit door een echte, veilige sleutel voor productie
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.2.19', ]
+API_TOKEN = 'MIJNVEILIGETOKEN123'
+
 
 # waar je LOGIN_URL e.d. zet:
 LOGIN_URL = '/registration/login/'        # jouw login‑pagina
@@ -26,7 +28,10 @@ LOGIN_EXEMPT_URLS = [
     # static en media
     r'^static/.*$',
     r'^media/.*$',
-    r'^accounts/.*$',                # als je django.contrib.auth.urls gebruikt
+    r'^accounts/.*$', 
+    r'^api/werkbon/barcode/.*$',
+    r'^api/werkbon/update/.*$',
+    # als je django.contrib.auth.urls gebruikt
 ]
 
 

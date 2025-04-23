@@ -1,10 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
   console.log("Planboard loaded.");
 
-  // 1) Grab CSRF token
   const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+  const token = "MIJNVEILIGETOKEN123";
 
-  // 2) Make external events draggable
   const externalEl = document.getElementById('external-events');
   if (externalEl) {
     new FullCalendar.Draggable(externalEl, {
@@ -18,19 +17,11 @@ document.addEventListener('DOMContentLoaded', function() {
       },
       removeOnDrop: true
     });
-    console.log("External events draggable ready.");
-  } else {
-    console.warn("No external-events container found.");
   }
 
-  // 3) Find and validate the calendar element
   const calendarEl = document.getElementById('calendar');
-  if (!calendarEl) {
-    console.error("Calendar element not found.");
-    return;
-  }
+  if (!calendarEl) return;
 
-  // 4) Initialize FullCalendar
   const calendar = new FullCalendar.Calendar(calendarEl, {
     schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
     initialView: 'resourceTimeGridWeek',
@@ -38,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
     height: '100%',
     editable: true,
     droppable: true,
-    eventResourceEditable: true,      // ← allow dragging between resources
+    eventResourceEditable: true,
     eventResizableFromStart: true,
     defaultTimedEventDuration: '01:00:00',
     headerToolbar: {
@@ -52,7 +43,6 @@ document.addEventListener('DOMContentLoaded', function() {
     resources: '/planning/api/resources/',
     events: '/planning/api/werkbonnen/',
 
-    // Custom content: show title, client & barcode
     eventContent(arg) {
       let html = `<div class="fc-event-title">${arg.event.title}</div>`;
       if (arg.event.extendedProps.client) {
@@ -64,101 +54,99 @@ document.addEventListener('DOMContentLoaded', function() {
       return { html };
     },
 
-    // Dropped from external list
     eventReceive(info) {
       console.log("External event received:", info.event.id);
       info.draggedEl?.remove();
-    },
-
-    // Moved inside the calendar
-    eventDrop(info) {
-      console.log("Event dropped:", info.event.id, "New start:", info.event.start.toISOString());
 
       const eventId = Number(info.event.id);
-      if (isNaN(eventId)) {
-        console.log("Temporary event, only local.");
-        calendar.refetchEvents();
+      const resourceId = info.event.getResources()?.[0]?.id || null;
+      const startTime = info.event.start.toISOString();
+
+      if (!eventId || !resourceId) {
+        console.warn("Missing eventId or resourceId.");
         return;
       }
 
-      const resources = info.event.getResources();
-      if (!resources.length) {
-        console.warn("No resource found, reverting.");
-        info.revert();
-        return;
-      }
-      const resourceId = resources[0].id;
-
-      fetch(`/planning/api/werkbonnen/${eventId}/update/`, {
+      fetch(`/planning/api/werkbonnen/${eventId}/update/?token=${token}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          start: info.event.start.toISOString(),
-          resourceId: resourceId
+          start: startTime,
+          resourceId: resourceId,
+          status: 'in_behandeling'
         })
       })
-      .then(res => {
-        if (!res.ok) return res.text().then(txt => Promise.reject(txt));
-        return res.json();
-      })
-      .then(data => {
-        if (data.status !== 'ok') {
-          return Promise.reject(data.message || "Unknown update error");
-        }
-        console.log("Update succeeded:", data);
-        calendar.refetchEvents();
-      })
-      .catch(err => {
-        console.error("Update failed:", err);
-        alert("Kon werkbon niet updaten. Wijziging wordt teruggedraaid.");
-        info.revert();
-      });
+        .then(res => res.ok ? res.json() : res.text().then(txt => Promise.reject(txt)))
+        .then(data => {
+          console.log("Werkbon opgeslagen:", data);
+          calendar.refetchEvents();
+          refreshUnscheduledWerkbonnen();
+        })
+        .catch(err => {
+          console.error("Fout bij opslaan:", err);
+          alert("Werkbon kon niet worden opgeslagen. Teruggezet.");
+          info.revert();
+        });
     },
 
-    // Click → go to detail page
+    eventDrop(info) {
+      const eventId = Number(info.event.id);
+      const resourceId = info.event.getResources()?.[0]?.id || null;
+      const startTime = info.event.start.toISOString();
+
+      if (!eventId || !resourceId) return;
+
+      fetch(`/planning/api/werkbonnen/${eventId}/update/?token=${token}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          start: startTime,
+          resourceId: resourceId,
+          status: 'in_behandeling'
+        })
+      })
+        .then(res => res.ok ? res.json() : res.text().then(txt => Promise.reject(txt)))
+        .then(data => {
+          calendar.refetchEvents();
+          refreshUnscheduledWerkbonnen();
+        })
+        .catch(err => {
+          console.error("Update failed:", err);
+          info.revert();
+        });
+    },
+
     eventClick(info) {
-      window.location.href = `/planning/werkbon_overzicht/${info.event.id}/`;
+      window.open(`/planning/werkbon/${info.event.id}/print/`, '_blank');
     }
   });
 
   calendar.render();
 
-  // 5) Load & cache resources so the filter can work
   let allResources = [];
   fetch('/planning/api/resources/')
     .then(r => r.json())
     .then(data => {
       allResources = data;
-      console.log("Resources loaded:", allResources);
-    })
-    .catch(err => console.error("Error fetching resources:", err));
+    });
 
-  // 6) Wire up the employee‑filter dropdown
   const employeeSelect = document.getElementById('employee-select');
   if (employeeSelect) {
     employeeSelect.addEventListener('change', () => {
       const val = employeeSelect.value;
-      if (val === 'alle') {
-        calendar.setOption('resources', allResources);
-      } else {
-        calendar.setOption(
-          'resources',
-          allResources.filter(r => String(r.id) === val)
-        );
-      }
+      calendar.setOption('resources', val === 'alle' ? allResources : allResources.filter(r => String(r.id) === val));
       calendar.refetchEvents();
     });
   }
 
-  // 7) “Nieuwe werkbon” button
   document.getElementById('add-workorder')?.addEventListener('click', () => {
     window.location.href = '/planning/aanmaken/';
   });
 
-  // 8) “Nieuwe Activiteit” button
   document.getElementById('new-activity-btn')?.addEventListener('click', () => {
     const types = [
       { id: 'route', title: 'Route rijden' },
@@ -166,30 +154,69 @@ document.addEventListener('DOMContentLoaded', function() {
       { id: 'vrij', title: 'Vrije dag' }
     ];
     let msg = "Selecteer activiteit:\n";
-    types.forEach((t, i) => msg += `${i+1}. ${t.title}\n`);
-    const idx = parseInt(prompt(msg),10) - 1;
+    types.forEach((t, i) => msg += `${i + 1}. ${t.title}\n`);
+    const idx = parseInt(prompt(msg), 10) - 1;
     if (isNaN(idx) || !types[idx]) return alert("Ongeldige keuze.");
 
     const now = new Date();
-    now.setHours(9,0,0,0);
+    now.setHours(9, 0, 0, 0);
     const payload = {
       title: types[idx].title,
       start: now.toISOString(),
       resource: allResources[0]?.title || ''
     };
 
-    fetch('/planning/api/werkbonnen/create/', {
+    fetch(`/planning/api/werkbonnen/create/?token=${token}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrfToken
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
     })
-    .then(r => r.ok ? calendar.refetchEvents() : r.text().then(txt => Promise.reject(txt)))
-    .catch(err => {
-      console.error("Error creating activity:", err);
-      alert("Kan activiteit niet aanmaken.");
-    });
+      .then(r => r.ok ? calendar.refetchEvents() : r.text().then(txt => Promise.reject(txt)))
+      .catch(err => {
+        console.error("Error creating activity:", err);
+        alert("Kan activiteit niet aanmaken.");
+      });
   });
+
+  function refreshUnscheduledWerkbonnen() {
+    fetch('/planning/api/werkbonnen/unscheduled/')
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById('external-events');
+        container.innerHTML = '';
+
+        if (data.length === 0) {
+          container.innerHTML = '<p>Geen werkbonnen beschikbaar.</p>';
+          return;
+        }
+
+        data.forEach(wb => {
+          const div = document.createElement('div');
+          div.className = 'fc-event external-event werkbon-kaart';
+          div.setAttribute('data-id', wb.id);
+          div.setAttribute('draggable', 'true');
+          div.innerHTML = `<strong>${wb.werkbonnummer}</strong><br><em>${wb.klant}</em>`;
+          container.appendChild(div);
+        });
+
+        new FullCalendar.Draggable(container, {
+          itemSelector: '.fc-event.external-event',
+          eventData(eventEl) {
+            return {
+              id: eventEl.dataset.id,
+              title: eventEl.querySelector('strong')?.innerText || '',
+              duration: '01:00'
+            };
+          },
+          removeOnDrop: true
+        });
+      })
+      .catch(err => {
+        console.error("Fout bij verversen van werkbonnen:", err);
+      });
+  }
+
+  window.refreshUnscheduledWerkbonnen = refreshUnscheduledWerkbonnen;
 });

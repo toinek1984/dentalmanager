@@ -174,10 +174,13 @@ class Werkbon(models.Model):
     marketing_optie = models.ForeignKey(MarketingCampagne, on_delete=models.SET_NULL, null=True, blank=True)
     
     STATUS_CHOICES = [
-        ('open', 'Open'),
-        ('in_behandeling', 'In behandeling'),
-        ('gesloten', 'Gesloten'),
-    ]
+    ('open', 'Open'),
+    ('in_behandeling', 'In behandeling'),
+    ('in_lab', 'In lab'),
+    ('fase_afgerond', 'Fase afgerond'),
+    ('gereed', 'Gereed voor herplanning'),
+    ('gesloten', 'Gesloten'),
+]
     status = models.CharField("Status", max_length=20, choices=STATUS_CHOICES, default='open')
     
     def save(self, *args, **kwargs):
@@ -203,3 +206,12 @@ class WerkUurLog(models.Model):
     
     def __str__(self):
         return f"Uurlog voor {self.werkbon.werkbonnummer} door {self.werknemer}"
+
+STATUS_CHOICES = [
+    ('open', 'Open'),
+    ('in_behandeling', 'In behandeling'),
+    ('in_lab', 'In lab'),
+    ('fase_afgerond', 'Fase afgerond'),  # ⬅️ Nieuwe tussenstatus
+    ('gereed', 'Gereed voor herplanning'),  # ⬅️ De status die je zocht
+    ('gesloten', 'Gesloten'),
+]

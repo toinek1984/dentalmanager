@@ -1,12 +1,14 @@
-# from django.urls import path
-# from . import api_views
+from django.urls import path
+from . import api_views
 
 # app_name = 'planning_api'  # Gebruik een duidelijke namespace
 
-# urlpatterns = [
+urlpatterns = [
     # path('werkbonnen/', api_views.werkbon_list, name='werkbon_list'),
     # path('werkbonnen/<int:pk>/update/', api_views.update_werkbon, name='werkbon_update'),
     # path('werkbonnen/create/', api_views.create_werkbon, name='create_werkbon'),
-    # path('resources/', api_views.api_resources, name='api_resources'),
+    path('resources/', api_views.api_resources, name='api_resources'),
+    path("werkbon/barcode/<str:barcode>/", api_views.werkbon_op_barcode, name="werkbon_op_barcode"),
+    
     # path('werkbonnen/overview/', api_views.api_werkbonnen, name='api_werkbonnen'),
-# ]
+]

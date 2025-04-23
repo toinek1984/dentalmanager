@@ -1,3 +1,5 @@
+#dentalmanager/urls.py
+
 from django.contrib import admin
 from django.urls import path, include
 from apps.home.views import home  # Zorg dat deze view bestaat
@@ -10,6 +12,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home, name='home'),
     path('accounts/', include('django.contrib.auth.urls')),
+    path('api/', include('apps.planning.api_urls')),  # ← nieuwe file nodig
     
     # path('registration/login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     # path('registration/logout/', auth_views.LogoutView.as_view(next_page='/registration/login/'), name='logout'),

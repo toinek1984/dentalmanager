@@ -20,6 +20,9 @@ LOGIN_EXEMPT_URLS = [
     # static en media
     r'^static/.*$',
     r'^media/.*$',
+    r'^api/werkbon/barcode/.*$',
+    r'^api/werkbon/update/.*$',
+
 ]
 
 
