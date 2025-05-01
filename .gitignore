@@ -1,0 +1,44 @@
+# Buildozer en Android-build-artifacts
+/.buildozer/
+/cli/scanner_app/.buildozer-*
+
+# Virtuele omgevingen
+/venv/
+/cli/scanner_app/.buildozer-venv/
+
+# Python cache en byte-compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Mac- en Windows-bestanden
+.DS_Store
+Thumbs.db
+
+# Logs en databases
+*.log
+*.sqlite3
+
+# Editor-specific
+.vscode/
+.idea/
+
+# Python cache en byte-compiled files
+__pycache__/
+*.py[cod]
+
+# SQLite database
+db.sqlite3
+
+# Media uploads en barcodes
+media/
+
+# CLI-mappen en build-artifacts
+cli/
+fullcalendar-examples/
+
+# Virtuele omgevingen
+venv/
+
+# Logs
+*.log
