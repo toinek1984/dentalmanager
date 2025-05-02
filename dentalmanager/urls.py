@@ -6,6 +6,7 @@ from apps.home.views import home  # Zorg dat deze view bestaat
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
+from django.views.generic import TemplateView
 
 urlpatterns = [
     # Admin en Home
@@ -13,6 +14,7 @@ urlpatterns = [
     path('', home, name='home'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('api/', include('apps.planning.api_urls')),  # ← nieuwe file nodig
+    path('', TemplateView.as_view(template_name='planning/planboard.html'), name='home'),
     
     # path('registration/login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     # path('registration/logout/', auth_views.LogoutView.as_view(next_page='/registration/login/'), name='logout'),

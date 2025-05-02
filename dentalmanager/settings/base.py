@@ -6,8 +6,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Veiligheids- en redirect-instellingen
 SECRET_KEY = 'jouw-geheime-sleutel'  # Vervang dit door een echte, veilige sleutel voor productie
-DEBUG = True
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.2.19', ]
+DEBUG = False
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.2.19', 'toine1984.pythonanywhere.com', ]
 API_TOKEN = 'MIJNVEILIGETOKEN123'
 
 
@@ -96,6 +96,7 @@ INSTALLED_APPS = [
 # Middleware configuratie
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -109,6 +110,8 @@ MIDDLEWARE = [
 
 # Root URL-conf
 ROOT_URLCONF = 'dentalmanager.urls'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_URL = '/static/'
 
 # Templates configuratie
 TEMPLATES = [
