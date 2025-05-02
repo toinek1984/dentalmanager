@@ -1,0 +1,72 @@
+
+
+/* Algemene styling voor de header en het hoofdmenu */
+nav ul.main-menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  background-color: #444;  /* donkerder grijs voor de balk */
+}
+
+nav ul.main-menu li {
+  position: relative;
+  margin: 0 5px;
+}
+
+/* Styling voor knoppen */
+nav ul.main-menu li .btn,
+nav ul.main-menu li button {
+  background-color: #666;  /* lichtere grijs voor de knoppen */
+  border: 1px solid #555;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-family: sans-serif;
+  color: #fff;
+  outline: none;
+}
+
+nav ul.main-menu li .btn:hover,
+nav ul.main-menu li button:hover {
+  background-color: #777;
+}
+
+/* Styling voor dropdown submenus */
+.dropdown .submenu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #666;  /* dezelfde als de knoppen */
+  border: 1px solid #555;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 200px;
+  z-index: 1000;
+}
+
+.dropdown .submenu li {
+  border-bottom: 1px solid #555;
+}
+
+.dropdown .submenu li a {
+  display: block;
+  padding: 8px 12px;
+  text-decoration: none;
+  color: #fff;
+}
+
+.dropdown .submenu li a:hover {
+  background-color: #777;
+}
+
+
+/* Footer */
+footer {
+    background-color: #0078D7;
+    color: #FFF;
+    padding: 10px 20px;
+    text-align: center;
+}
+

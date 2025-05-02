@@ -1,7 +1,13 @@
 # Development settings
 from .base import *  # ✅ Dit zorgt ervoor dat alle basisinstellingen worden geladen
 import os
-DEBUG = True
+
+
+SECRET_KEY = 'jouw-geheime-sleutel'  # Vervang dit door een echte, veilige sleutel voor productie
+DEBUG = False
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.2.19', 'toine1984.pythonanywhere.com', ]
+API_TOKEN = 'MIJNVEILIGETOKEN123'
+
 
 # waar je LOGIN_URL e.d. zet:
 LOGIN_URL = '/registration/login/'        # jouw login‑pagina
@@ -25,6 +31,8 @@ LOGIN_EXEMPT_URLS = [
 
 ]
 
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_URL = '/static/'
 
 # Installed apps: Django apps, derde-partij apps en eigen apps
 INSTALLED_APPS = [
@@ -69,6 +77,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
 
