@@ -1,44 +1,42 @@
-# Buildozer en Android-build-artifacts
-/.buildozer/
-/cli/scanner_app/.buildozer-*
-
-# Virtuele omgevingen
-/venv/
-/cli/scanner_app/.buildozer-venv/
-
-# Python cache en byte-compiled files
+﻿# Python / Django
 __pycache__/
 *.py[cod]
-*$py.class
+*.pyo
+*.log
 
-# Mac- en Windows-bestanden
+# Virtual envs
+.venv/
+venv/
+env/
+*/.venv/
+*/venv/
+*/env/
+
+# IDE/editor
+.vscode/
+.idea/
+*.code-workspace
+
+# OS
 .DS_Store
 Thumbs.db
 
-# Logs en databases
-*.log
+# Django static/media
+/staticfiles/
+/media/
+
+# Databases (lokaal)
 *.sqlite3
 
-# Editor-specific
-.vscode/
-.idea/
+# Secrets
+.env
+*.key
+*.pem
 
-# Python cache en byte-compiled files
-__pycache__/
-*.py[cod]
+# Node (indien aanwezig)
+node_modules/
+dist/
+build/
 
-# SQLite database
-db.sqlite3
-
-# Media uploads en barcodes
-media/
-
-# CLI-mappen en build-artifacts
-cli/
-fullcalendar-examples/
-
-# Virtuele omgevingen
-venv/
-
-# Logs
-*.log
+# Packaging
+*.egg-info/
